@@ -1,20 +1,20 @@
 // show/hide plots and table
 $(document).ready(function(){
 $('#dtBin').click(function(){
-  $('#DtBin').toggle();
+  $('#DtBin').slideToggle();
 });
 
 $('#intConfig1').click(function(){
     $('#DtBin').slideUp();
-  $('#IntConfig1').toggle();
+  $('#IntConfig1').slideToggle();
 });
 
 $('#intConfig2').click(function(){
-  $('#IntConfig2').toggle();
+  $('#IntConfig2').slideToggle();
 });
 
 $('#vwIntraMap').click(function(){
-  $('#IntraMap').toggle();
+  $('#IntraMap').slideToggle();
 	//$('#dSwitch').toggleClass('hide');
   //$('#Map1').toggleClass('col-sm-6 col-sm-4');
   //$('#Map2').toggleClass('col-sm-6 col-sm-8');
@@ -22,12 +22,12 @@ $('#vwIntraMap').click(function(){
 
 $('#vwMap1').click(function(){
   $('#IntraMap').slideUp();
-  $('#Map1').toggle();
+  $('#Map1').slideToggle();
 });
 
 $('#vwScaf').click(function(){
   $('#IntraMap').slideUp();
-  $('#VwScaf').toggle();
+  $('#VwScaf').slideToggle();
 });
 
 
@@ -36,19 +36,19 @@ $('#vwJointMap').click(function(){
 });
 
 $('#vwIntData').click(function(){
-  $('#VwIntData').toggle();
+  $('#VwIntData').slideToggle();
     $('#VwJointMap').slideUp();
 });
 
 $('#vwJointMap2').click(function(){
   $('#VwJointMap').slideUp();
    $('#VwIntData').slideUp();
-  $('#VwJointMap2').toggle();
+  $('#VwJointMap2').slideToggle();
 });
 
 $('#scafConfig').click(function(){
   $('#IntConfig2').slideUp();
-  $('#ScafConfig').toggle();
+  $('#ScafConfig').slideToggle();
 });
 
   // reset the app when the button pressed
