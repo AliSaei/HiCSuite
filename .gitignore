@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+test_data/unknown_contact_20k.rds
+test_data/unknown_sequence_len.csv
+test_data/bilbery_contact_1kb.rds
