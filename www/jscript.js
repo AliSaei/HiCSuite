@@ -63,5 +63,6 @@ $("#mapSrc").attr('title', 'Data source');
 $("#exitZoom").attr('title', 'Exit zoom');
 $("#clearBrush").attr('title', 'Clear cut line');
 $("#cut2").attr('title', 'Cut sequence');
+$("#svChanges").attr('title', 'Save change to the set data directory');
 });
 
