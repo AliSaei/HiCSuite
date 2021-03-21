@@ -4,7 +4,7 @@ library(HiCSuite)
 library(dplyr)
 library(shinycustomloader)
 library(shinyjs)
-
+library(shinyFiles)
 
 shinyUI(fluidPage(
   div(style = "position: fixed; height: 100%; background: #ece9df; padding: 10px; font-size: 12px; width: 250px; border-right: 1px solid lightgray; font-family: Tahoma;",
