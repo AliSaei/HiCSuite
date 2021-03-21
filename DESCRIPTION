@@ -9,11 +9,11 @@ Imports:
     data.table,
     ggplot2,
     shinyWidgets,
-	shinycustomloader,
-	shinyjs,
-	shinyFiles
+    shinycustomloader,
+    shinyjs,
+    shinyFiles
 Depends:
-    shiny
+    shiny (>= 1.3.0)
 License: Attribution-NonCommercial 4.0 International
 Encoding: UTF-8
 LazyData: true
