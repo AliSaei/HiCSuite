@@ -1,0 +1,19 @@
+Package: HiCSuite
+Title: Genome Scaffolding using Hi-C data
+Version: 1.0.0
+Authors@R: person("Ali", "Saei", email = "saeibox@gmail.com", role = c("aut", "cre"))
+Description: Visualizing and Exploring Hi-C data and use a shiny app to scaffold assembled contigs to chromosomes.
+Depends: R (>= 3.6.0)
+Imports:
+    dplyr,
+    data.table,
+    ggplot2,
+    shinyWidgets,
+	shinycustomloader,
+	shinyjs,
+	shinyFiles
+Depends:
+    shiny
+License: Attribution-NonCommercial 4.0 International
+Encoding: UTF-8
+LazyData: true
