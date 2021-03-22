@@ -10,7 +10,6 @@ library(shinyFiles)
 options(future.globals.maxSize = 50*1024^2,
         shiny.maxRequestSize=300*1024^2)
 shinyOptions(progress.style="old")
-output_dir = NULL
 
 #library(readxl)
 #anchored_contigs <- read_excel("/Volumes/workspace/hrpazs/bilberry_genome/chr_bilberry.xlsx", 
@@ -41,7 +40,7 @@ server <- function(input, output, session) {
   rv <- reactiveValues(chr = NULL, s2.1 = NULL, cut_pos = 0, 
                        intramap_range = NULL,  btn_val2 = c(0,0))
   
-  volumes <- c(Home = fs::path_home(), getVolumes()(), `Data Directory` = "../../../")
+  volumes <- c(Home = fs::path_home(), getVolumes()(), `App Directory` = "../../../")
   
   shinyDirChoose(input, 'directory', roots = volumes, session = session,
                  restrictions = system.file(package = "base"))
@@ -55,13 +54,11 @@ server <- function(input, output, session) {
     updatePickerInput(session, "mapFile", choices = mapFiles,                           
                       choicesOpt = list(style = paste(rep_len("font-size: 12px; line-height: 1.5; 
                                                               margin-left: -10px; border-bottom: 1px solid gray;", 
-                                                              length(mapFiles)), "background-color: lightgray;"))
-    )
+                                                              length(mapFiles)), "background-color: lightgray;")))
     updatePickerInput(session, "lenFile", choices = lenFiles,                           
                       choicesOpt = list(style = paste(rep_len("font-size: 12px; line-height: 1.5; 
                                                               margin-left: -10px; border-bottom: 1px solid gray;", 
-                                                              length(lenFiles)), "background-color: lightgray;"))
-    )
+                                                              length(lenFiles)), "background-color: lightgray;")))
   })
   
   observeEvent(input$import_data,{
@@ -459,7 +456,6 @@ server <- function(input, output, session) {
       p <- join_maps_plus(rv$mat_binned, seq = seq, subseq = subseq, 
                          direction = isolate(input$dir1), 
                          binsize = isolate(rv$binsize), 
-                         output_dir = output_dir, 
                          output = "data")
     } else {
       p <- rv$mat_binned[rname == input$seq1 & mrnm == input$seq1, ]
@@ -626,7 +622,7 @@ server <- function(input, output, session) {
         }
       }
       rv$sel_map <- join_maps_plus(rv$mat_binned, seq = rv$s1, subseq = rv$s2.1, binsize = isolate(rv$binsize),  
-                                  direction = input$dir2, output_dir = output_dir, output = "data")
+                                  direction = input$dir2, output = "data")
     })
   })
   
@@ -716,23 +712,7 @@ server <- function(input, output, session) {
     res
   })
   
-  ## Batch run ------------------------------------
-  observeEvent(input$build_map,{
-    shiny::validate(need(rv$subseq2, ""))
-    
-    cmd <- paste0("open ", normalizePath(output_dir))
-    system(cmd)
-    
-    direction <- input$dir2
-    seq <- input$seq2
-    subseq <- rv$subseq2$mrnm[1:20]
-    
-    #future({
-    # draw the interaction map of the intial sequence with the other sequence individually and store plots on disk
-    join_maps(mat, seq, subseq, direction = direction, output_dir = output_dir)
-    #})
-  })
-  
+
   ## Join sequences together ---------------------------
   observeEvent(input$add,{
     withBusyIndicatorServer("add", {
