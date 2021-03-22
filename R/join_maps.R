@@ -1,5 +1,5 @@
 #' @export
-join_map <- function(mat, seq, subseq, binsize, direction = "Forward", output = "data", output_dir = NULL){
+join_maps <- function(mat, seq, subseq, binsize, direction = "Forward", output = "data", output_dir = NULL){
 
   if(is.null(seq)) 
     return(NULL)
