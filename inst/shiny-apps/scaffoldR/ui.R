@@ -6,7 +6,6 @@ library(shinycustomloader)
 library(shinyjs)
 library(shinyFiles)
 
-
 shinyUI(fluidPage(
   div(style = "position: fixed; height: 100%; background: #ece9df; padding: 10px; font-size: 12px; width: 250px; border-right: 1px solid lightgray; font-family: Tahoma;",
       div(style = "text-align: center; font-weight: 600; font-size: 18px; background-color: white; padding: 5px; border-radius: 5px;",
@@ -30,7 +29,7 @@ shinyUI(fluidPage(
                            conditionalPanel(
                              condition = "input.mapSrc == 'Local'",
                              #shiny::fileInput("contactMap", NULL, accept = c("csv", ".txt", ".rds"), width = '100%'),
-                             shinyDirButton('directory', label='Set Data Directory', 
+                             shinyFiles::shinyDirButton('directory', label='Set Data Directory', 
                                             title='Please select a folder', 
                                             class = "btn-dir", icon = icon("folder-open")),
                              #verbatimTextOutput("dirPath"),

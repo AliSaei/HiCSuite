@@ -9,10 +9,9 @@ Imports:
     data.table,
     ggplot2,
     shinyWidgets,
-	shinycustomloader,
-	shinyjs,
-	shinyFiles
-Depends:
+    shinycustomloader,
+    shinyjs,
+    shinyFiles,
     shiny
 License: Attribution-NonCommercial 4.0 International
 Encoding: UTF-8
