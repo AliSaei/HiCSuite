@@ -1,6 +1,6 @@
 #' @export
 
-join_map_plus <- function(mat, seq, subseq = NULL,  binsize, direction = "Forward", output_dir = NULL, output = list("data", "graph")){
+join_maps_plus <- function(mat, seq, subseq = NULL,  binsize, direction = "Forward", output_dir = NULL, output = list("data", "graph")){
   # name the chromosme being assembled
   
   
@@ -13,11 +13,11 @@ join_map_plus <- function(mat, seq, subseq = NULL,  binsize, direction = "Forwar
   
   
   if(n < 3) {
-    combined_maps <- join_map(mat, maps[1], maps[2], direction = direction , output_dir = output_dir, binsize = binsize, output = output)
+    combined_maps <- join_maps(mat, maps[1], maps[2], direction = direction , output_dir = output_dir, binsize = binsize, output = output)
   } else {
     if(direction == "Backward") maps <- gsub("^\\s+|\\s$", "", c(subseq, seq))
     
-    combined_maps <- join_map(mat, maps[1], maps[2], binsize = binsize,  output = "data")
+    combined_maps <- join_maps(mat, maps[1], maps[2], binsize = binsize,  output = "data")
     for(i in 3:n) {
       
       # remove '+-" signs

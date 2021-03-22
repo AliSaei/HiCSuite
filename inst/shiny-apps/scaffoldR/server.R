@@ -6,7 +6,6 @@ library(shinyWidgets)
 library(shinycustomloader)
 library(shinyjs)
 library(shinyFiles)
-library(HiCSuite)
 
 options(future.globals.maxSize = 50*1024^2,
         shiny.maxRequestSize=300*1024^2)

@@ -2,8 +2,9 @@ library(shiny)
 library(shinyWidgets)
 library(HiCSuite)
 library(dplyr)
-library(shinycssloaders)
+library(shinycustomloader)
 library(shinyjs)
+library(shinyFiles)
 
 
 shinyUI(fluidPage(
