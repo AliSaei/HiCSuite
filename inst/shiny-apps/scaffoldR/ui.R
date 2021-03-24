@@ -9,8 +9,8 @@ library(shinyFiles)
 shinyUI(fluidPage(
   div(style = "position: fixed; height: 100%; background: #ece9df; padding: 10px; font-size: 12px; width: 250px; border-right: 1px solid lightgray; font-family: Tahoma;",
       div(style = "text-align: center; font-weight: 600; font-size: 18px; background-color: white; padding: 5px; border-radius: 5px;",
-        span("ScaffoldR")
-        ),
+          span("ScaffoldR")
+      ),
       fluidRow(style = "margin: 10px 0 0 0;",
                tags$button(id = "dtInput", class = "btn btn-default btn-md btn-accordion",
                            list(NULL, label = "Data Input"),
@@ -30,8 +30,8 @@ shinyUI(fluidPage(
                              condition = "input.mapSrc == 'Local'",
                              #shiny::fileInput("contactMap", NULL, accept = c("csv", ".txt", ".rds"), width = '100%'),
                              shinyFiles::shinyDirButton('directory', label='Set Data Directory', 
-                                            title='Please select a folder', 
-                                            class = "btn-dir", icon = icon("folder-open")),
+                                                        title='Please select a folder', 
+                                                        class = "btn-dir", icon = icon("folder-open")),
                              #verbatimTextOutput("dirPath"),
                              div(style = "margin-top: 0px;",
                                  pickerInput("mapFile", NULL, choices = NULL , multiple = FALSE,
@@ -242,6 +242,15 @@ shinyUI(fluidPage(
                        ),
                        div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 10px;",
                            div(id = "IntConfig2", style = "padding: 5px;",
+                               radioGroupButtons("lnkDataSrc", "Data source:", choices = c("Import", "Calculate"), selected = "Import", 
+                                                 justified = TRUE, size = "xs", status = "gray", 
+                                                 checkIcon = list(
+                                                   yes = tags$i(class = "fa fa-circle", 
+                                                                style = "color: black"),
+                                                   no = tags$i(class = "fa fa-circle-o", 
+                                                               style = "color: #F0F0F0"))),
+                               conditionalPanel(
+                                 condition = "input.lnkDataSrc == 'Calculate'",
                                fluidRow(style = "margin: 0px;",
                                         numericInput("edgeSize3", "Edge Size:", value = 1, 
                                                      min = 0, max = 500000, step= 10000),
@@ -255,6 +264,10 @@ shinyUI(fluidPage(
                                                            icon = icon('calculator', lib = "font-awesome"))
                                             )
                                         )
+                               )
+                               ),
+                               conditionalPanel(
+                                 condition = "input.lnkDataSrc == 'Import'"
                                )
                            )
                        ),
@@ -293,7 +306,7 @@ shinyUI(fluidPage(
                                               div(style = "margin: 0;",
                                                   sliderInput("maxLinkDen", NULL, value = 1, min = 0, max = 1, 
                                                               width = '100%', ticks = FALSE, pre = "Max link density:")
-                                                  ),
+                                              ),
                                               div(style = "margin-top: -10px;",
                                                   sliderInput("minSeqLen", NULL, value = 0, min = 0, max = 1, 
                                                               width = '100%', ticks = FALSE, pre = "Min length: ", post = " Mb")
@@ -329,8 +342,6 @@ shinyUI(fluidPage(
                                  div(style = "margin-top: 20px; margin-bottom: 10px;",
                                      fluidRow(style = "margin: 0px;",
                                               div(style = "width: 35px; float: left;",
-                                                  actionBttn("clipbtn", NULL, icon = icon('copy', lib = "glyphicon"), 
-                                                             style = "material-circle", size = "xs"),
                                                   actionBttn("edit", NULL, icon = icon('edit', lib = "glyphicon"), 
                                                              style = "material-circle", size = "xs"),
                                                   shinyjs::hidden(
@@ -338,8 +349,11 @@ shinyUI(fluidPage(
                                                                style = "material-circle", size = "xs")
                                                   ),
                                                   actionBttn("erase", NULL, icon = icon('erase', lib = "glyphicon"), 
+                                                             style = "material-circle", size = "xs"),
+                                                  actionBttn("clipbtn", NULL, icon = icon('copy', lib = "glyphicon"), 
                                                              style = "material-circle", size = "xs")
                                               ),
+                                              
                                               div(style = "width: calc(100% - 35px); float: left;",
                                                   div(id = "CheckBox", style = "border: 1px solid #F0F0F0; padding: 5px; border-radius: 3px; min-height: 85px; max-height: 300px; overflow-y: auto; background: white;",
                                                       checkboxGroupInput("scaf_auto", "Scaffold:", choices = NULL)
@@ -373,52 +387,56 @@ shinyUI(fluidPage(
                        )
                    ),
                    div(style = "margin-left: 5px; float: left; width: calc(100% - 305px);",  
-                       div(style = "border-left: 2px solid lightgray;",
+                       div(style = "border-left: 2px solid lightgray; border-bottom: 2px solid lightgray;",
                            div(
                              actionButton("vwJointMap", "View Map",icon = icon("table"), width = "200px"),
                              tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
                            ),
-                           div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",
-                               div(id = "VwJointMap", style ="padding: 10px; display: none;", 
-                                   actionBttn("exitZoom2", NULL, icon = icon('home', lib = "glyphicon"), style = "material-circle", size = "xs"),
-                                   actionBttn("clearBrush2", NULL, icon = icon('erase', lib = "glyphicon"), style = "material-circle", size = "xs"),
-                                   div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
-                                       plotOutput("map1", width = "auto", height = "auto", brush = "map1_brush",hover = hoverOpts(id = "map1_hover")) 
-                                   )
+
+                           fluidRow(id = "VwJointMap",  style = "margin: 2px 0 0 1px;",
+                             tabsetPanel(
+                               tabPanel("Table", 
+                                        div(style = "border: 1px solid #F0F0F0; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
+                                            div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px;",
+                                                DT::DTOutput("interseqData") 
+                                            )
+                                        ),
+                                        downloadButton("interseqLinks", "Download All Data")
+                               ),
+                               tabPanel("Plot", 
+                                        div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df; font-size: 12px; font-family: Tahoma; margin: 5px 5px 0px 5px; ",
+                                            actionBttn("exitZoom2", NULL, icon = icon('home', lib = "glyphicon"), style = "material-circle", size = "xs"),
+                                            actionBttn("clearBrush2", NULL, icon = icon('erase', lib = "glyphicon"), style = "material-circle", size = "xs"),
+                                            div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
+                                                plotOutput("map1", width = "auto", height = "auto", brush = "map1_brush",hover = hoverOpts(id = "map1_hover")) 
+                                            )
+                                        )
                                )
+                             )
                            ),
                            div(
-                             actionButton("vwIntData", "View Data",icon = icon("table"), width = "200px"),
-                             tags$style(HTML("#vwIntData{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
-                           ),
-                           div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
-                               div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px; display: none;",
-                                   DT::DTOutput("interseqData") 
-                               )
-                           )
-                       )
-                   )
-               )
-      ),
-      div(
-        actionButton("vwJointMap2", "View Scaffold Map",icon = icon("table"), width = "285px"),
-        tags$style(HTML("#vwJointMap2{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; 
+                             actionButton("vwJointMap2", "View Scaffold Map",icon = icon("table"), width = "200px"),
+                             tags$style(HTML("#vwJointMap2{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; 
                         padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
-      ),
-      fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
-               div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
-                   div(style = "border: 1px solid lightgray; width: 100%; padding: 7px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
-                       withBusyIndicatorUI(
-                         actionButton("combineMaps", "Build scaffold map", class = "action_button")
-                       )
-                   ),
-                   div(style = "width: calc(100% - 270px); float: left;",
-                       div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",
-                           div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
-                               plotOutput("map2", width = "auto", height = "auto", hover = hoverOpts(id = "map2_hover")) %>%
-                                 withLoader(type="html", loader="loader5")
                            ),
-                           uiOutput("map2_hoverinfo")
+                           fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
+                                    div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
+                                        div(style = "border: 1px solid lightgray; width: 100%; padding: 7px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
+                                            withBusyIndicatorUI(
+                                              actionButton("combineMaps", "Build scaffold map", class = "action_button")
+                                            )
+                                        ),
+                                        div(style = "width: calc(100% - 270px); float: left;",
+                                            div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",
+                                                div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
+                                                    plotOutput("map2", width = "auto", height = "auto", hover = hoverOpts(id = "map2_hover")) %>%
+                                                      withLoader(type="html", loader="loader5")
+                                                ),
+                                                uiOutput("map2_hoverinfo")
+                                            )
+                                        )
+                                    )
+                           )
                        )
                    )
                )

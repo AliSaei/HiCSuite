@@ -11,6 +11,9 @@ options(future.globals.maxSize = 50*1024^2,
         shiny.maxRequestSize=300*1024^2)
 shinyOptions(progress.style="old")
 
+#source("./R/join_maps.R")
+#source("./R/join_maps_plus.R")
+
 #library(readxl)
 #anchored_contigs <- read_excel("/Volumes/workspace/hrpazs/bilberry_genome/chr_bilberry.xlsx", 
 #                               sheet =  "Billberry (2)") %>%
@@ -323,12 +326,13 @@ server <- function(input, output, session) {
                      
                      #set plot size to default
                      rv$intramap_range <- NULL
+                     rv$edge_slc <- edge_slc
                    })
     })
   })
   
-  output$interseqData <- DT::renderDataTable({
-    DT::datatable(rv$interseq_contact ,
+  output$interseqData <- DT::renderDT({
+    DT::datatable(rv$interseq_links ,
                   escape = FALSE, filter = 'bottom', rownames= FALSE, 
                   class = 'nowrap display compact order-column cell-border stripe', 
                   extensions = c('Buttons', 'ColReorder'), selection = "single",
@@ -352,6 +356,15 @@ server <- function(input, output, session) {
     )
   })
   
+  
+  output$interseqLinks <- downloadHandler(
+       filename = function() {
+         paste(Sys.Date(), 'interseq_Links_EdgeSize',rv$edge_slc, '.csv', sep='')
+       },
+       content = function(con) {
+         write.csv(rv$interseq_contact , con)
+       }
+     )
   ##------------------------------------------------------------------------------------------------------------
   ##------------------------------------------------------------------------------------------------------------
   observe({
