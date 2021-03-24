@@ -4,6 +4,10 @@ library(dplyr)
 library(ggplot2)
 library(shinyWidgets)
 library(shinycustomloader)
+library(shiny)
+library(shinyWidgets)
+library(dplyr)
+library(shinycustomloader)
 library(shinyjs)
 library(shinyFiles)
 
@@ -16,6 +20,8 @@ shinyOptions(progress.style="old")
 
 #source("../../../R/join_maps.R")
 #source("../../../R/join_maps_plus.R")
+source("./functions.R")
+source("./helpers.R")
 
 #library(readxl)
 #anchored_contigs <- read_excel("/Volumes/workspace/hrpazs/bilberry_genome/chr_bilberry.xlsx", 
@@ -489,7 +495,7 @@ server <- function(input, output, session) {
       strand <- ifelse(input$strand_1, "+", "-")
       subseq = paste0(strand,input$subseq1)
       
-      p <- HiCSuite::join_maps_plus(rv$mat_binned, seq = seq, subseq = subseq, 
+      p <- join_maps_plus(rv$mat_binned, seq = seq, subseq = subseq, 
                           direction = isolate(input$dir1), 
                           binsize = isolate(rv$binsize), 
                           output = "data")
@@ -654,7 +660,7 @@ server <- function(input, output, session) {
           }
         }
       }
-      rv$sel_map <- HiCSuite::join_maps_plus(rv$mat_binned, seq = rv$s1, subseq = rv$s2.1, binsize = isolate(rv$binsize),  
+      rv$sel_map <- join_maps_plus(rv$mat_binned, seq = rv$s1, subseq = rv$s2.1, binsize = isolate(rv$binsize),  
                                    direction = input$dir2, output = "data")
     })
   })
@@ -847,7 +853,7 @@ server <- function(input, output, session) {
                      #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$chained_seq}
                      maps <- input$chained_seq
                      
-                     rv$combined_maps <- HiCSuite::join_maps_plus(mat = rv$mat_binned, seq = maps, direction = "Forward", 
+                     rv$combined_maps <- join_maps_plus(mat = rv$mat_binned, seq = maps, direction = "Forward", 
                                                         output = "data", binsize = isolate(rv$binsize))
                      
                      #fwrite(chr, paste0("./","chr",chr_no,"_",n, ".csv"), row.names = FALSE)

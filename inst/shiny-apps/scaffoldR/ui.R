@@ -6,6 +6,8 @@ library(shinycustomloader)
 library(shinyjs)
 library(shinyFiles)
 
+source("./helpers.R")
+
 shinyUI(fluidPage(
   div(style = "position: fixed; height: 100%; background: #ece9df; padding: 10px; font-size: 12px; width: 250px; border-right: 1px solid lightgray; font-family: Tahoma;",
       div(style = "text-align: center; font-weight: 600; font-size: 18px; background-color: white; padding: 5px; border-radius: 5px;",
@@ -347,7 +349,7 @@ shinyUI(fluidPage(
                                          )
                                      )
                                  ),
-                                 div(
+                                 div(style = "margin-top: 20px;",
                                    div("Leading sequence numbers:", style = "width: 175px; float: left; padding: 6px 2px 6px 2px;; border: 1px solid lightgray; height: 34px; border-radius: 3px; background: #F4F4F4; margin: top: 2px; font-weight:550;"),
                                    div(style = "width: calc(100% - 175px); float: left;",
                                        numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1)
