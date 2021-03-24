@@ -14,8 +14,8 @@ shinyOptions(progress.style="old")
 #negate %in% 
 `%!in%` = Negate(`%in%`)
 
-#source("./R/join_maps.R")
-#source("./R/join_maps_plus.R")
+source("../../../R/join_maps.R")
+source("../../../R/join_maps_plus.R")
 
 #library(readxl)
 #anchored_contigs <- read_excel("/Volumes/workspace/hrpazs/bilberry_genome/chr_bilberry.xlsx", 
@@ -37,10 +37,7 @@ shinyOptions(progress.style="old")
 #  write.table(data, file, row.names = FALSE, col.names = FALSE, quote = FALSE) 
 #}
 
-#sequence_length <- fread(paste0("./data/","bilberry/sequence_len_bilberry.csv"), col.names = c("rname","len"), select = c(1, 2)) 
-#a <- anchored_contigs[sequence_length, on = c(name = "rname")]
 
-#sum(a[!is.na(contig), len])/sum(a[, len])*100
 
 server <- function(input, output, session) {
   rv <- reactiveValues(chr = NULL, s2.1 = NULL, cut_pos = 0, 
@@ -300,20 +297,20 @@ server <- function(input, output, session) {
                      rv$interseq_links <-  rv$sequence_length[rv$mat_binned[rname != mrnm,], on = c("rname")] %>%
                        .[rv$sequence_length, on = c("mrnm" = "rname"), ':='(mrnm_len = i.rname_len)] %>%
                        .[((pos < edge_slc | pos > rname_len - edge_slc) & (mpos < edge_slc | mpos > mrnm_len - edge_slc)),] %>%
-                       .[, ':='(rname_dir = ifelse(pos < edge_slc, "-", 
+                       .[, ':='(rname_strand = ifelse(pos < edge_slc, "-", 
                                                    ifelse(pos > rname_len - edge_slc, "+", "M")),
-                                mrnm_dir = ifelse(mpos < edge_slc, "+", 
+                                mrnm_strand = ifelse(mpos < edge_slc, "+", 
                                                   ifelse(mpos > mrnm_len - edge_slc, "-", "M")),
                                 edge_rname = ifelse(rname_len < edge_slc, rname_len, edge_slc),
                                 edge_mrnm = ifelse(mrnm_len < edge_slc, mrnm_len, edge_slc))] %>%
                        .[order(rname_len, decreasing = TRUE), .(link_no = .N, sum = sum(n), 
                                                                 edge_rname = max(edge_rname), 
                                                                 edge_mrnm = max(edge_mrnm)), 
-                         by = .(rname, mrnm, rname_dir, mrnm_dir, rname_len, mrnm_len)] %>%
+                         by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)] %>%
                        .[sum > 2,.(link_density = round(link_no/(ceiling(edge_rname/rv$binsize) * 
                                                                    ceiling(edge_mrnm/rv$binsize)),2), 
                                    link_no, sum, avg = sum/link_no), 
-                         by = .(rname, mrnm, rname_dir, mrnm_dir, rname_len, mrnm_len)]
+                         by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)]
                      
                      #bin_rname =(link_no/ceiling(min(edge_rname,edge_mrnm)/rv$binsize))/10
                      choices <- unique(rv$interseq_links$rname)
@@ -347,7 +344,7 @@ server <- function(input, output, session) {
                      interseq_links <- fread(file.path(rv$projDir,input$lnkFile)) 
                      
                      # These columns are being used for downstream calculations
-                     required_cols <- c("rname", "mrnm", "mrnm_dir", "rname_dir", "mrnm_len", "rname_len", "link_density")
+                     required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rname_len", "link_density")
                      
                      if(any(required_cols %!in% names(interseq_links)))
                        stop(paste("Columns", paste0(required_cols, collapse = ", "), 
@@ -402,10 +399,10 @@ server <- function(input, output, session) {
     
     if(input$dir1 == "Backward"){
       subseq1 <- rv$interseq_links[mrnm %in% seq & (!rname %in% seq),] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = rname, x_dir = rname_dir)] 
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = rname, x_dir = rname_strand)] 
     } else {
       subseq1 <- rv$interseq_links[rname %in% seq & (!mrnm %in% seq),] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = mrnm, x_dir = mrnm_dir)]
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = mrnm, x_dir = mrnm_strand)]
     }
     
     choices <- unique(subseq1$x)
@@ -561,7 +558,7 @@ server <- function(input, output, session) {
     shiny::validate(need(input$seq2, ""))
     shiny::validate(need(rv$interseq_links, ""))
     
-    len <- length(isolate(input$scaf_auto))
+    len <- length(isolate(input$chained_seq))
     seq2 <- input$seq2
     leading_seq <- seq2[length(seq2)]
     leadingSeq_len <-  max(rv$mat_binned[rname == leading_seq, pos])
@@ -579,10 +576,10 @@ server <- function(input, output, session) {
     
     if(input$dir2 == "Backward"){
       rv$subseq2 <- rv$interseq_links[mrnm %in% leading_seq & (!rname %in% leading_seq) & link_density <= maxLinkDen & rname_len >= minSeqLen,] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = rname, x_dir = rname_dir)] 
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = rname, x_dir = rname_strand)] 
     } else {
       rv$subseq2 <- rv$interseq_links[rname %in% leading_seq & (!mrnm %in% leading_seq) & link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = mrnm, x_dir = mrnm_dir)]
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = mrnm, x_dir = mrnm_strand)]
     }
     
   })
@@ -590,7 +587,7 @@ server <- function(input, output, session) {
   observe({
     shiny::validate(need(rv$subseq2, ""))
     
-    chr <- gsub("^[-+]", "", c(input$scaf_auto, input$scaf_man))
+    chr <- gsub("^[-+]", "", c(input$chained_seq, input$scaf_man))
     rv$subseq2.1 <- rv$subseq2[(!(x %in% chr)), ]
     rv$choices <- c(unique(rv$subseq2.1$x), chr)
     
@@ -639,7 +636,7 @@ server <- function(input, output, session) {
       strand_2 <- ifelse(input$strand_2, "+", "-")
       strand_3 <- ifelse(input$strand_3, "+", "-")
       rv$s2.1 <- paste0(strand_3, input$subseq2)
-      chr <- isolate(input$scaf_auto)
+      chr <- isolate(input$chained_seq)
       
       if(input$nrSeq == 1 | is.null(chr)){
         rv$s1 <- paste0(strand_2, input$seq2)
@@ -753,7 +750,7 @@ server <- function(input, output, session) {
   observeEvent(input$add,{
     withBusyIndicatorServer("add", {
       
-      if(length(input$scaf_auto) == 0){
+      if(length(input$chained_seq) == 0){
         if (input$dir2 == 'Backward'){
           rv$chr <- c( rv$s2.1, rv$s1)
         } else {
@@ -761,23 +758,23 @@ server <- function(input, output, session) {
         }
       } else {
         if (input$dir2 == 'Backward'){
-          rv$chr <- c(rv$s2.1, input$scaf_auto)
+          rv$chr <- c(rv$s2.1, input$chained_seq)
         } else {
-          rv$chr <-  c(input$scaf_auto, rv$s2.1)
+          rv$chr <-  c(input$chained_seq, rv$s2.1)
         }
       }
-      updateCheckboxGroupInput(session, "scaf_auto", NULL, choices = unique(rv$chr), selected = unique(rv$chr))
+      updateCheckboxGroupInput(session, "chained_seq", NULL, choices = unique(rv$chr), selected = unique(rv$chr))
       updateTextAreaInput(session, "scaf_edit", NULL, value = paste(unique(rv$chr), collapse = "\n"))
     })
   })
   
   ## copy to clipboard
-  observeEvent(input$clipbtn, clipr::write_clip(input$scaf_auto))
+  observeEvent(input$clipbtn, clipr::write_clip(input$chained_seq))
   
   ## erase the list 
   observeEvent(input$erase,{ 
-    choices =  input$scaf_auto
-    updateCheckboxGroupInput(session, "scaf_auto", NULL, choices =  choices[1], selected =  choices[1])
+    choices =  input$chained_seq
+    updateCheckboxGroupInput(session, "chained_seq", NULL, choices =  choices[1], selected =  choices[1])
   })
   
   ## edit the list 
@@ -791,7 +788,7 @@ server <- function(input, output, session) {
   observeEvent(input$check,{ 
     
     choices = base::strsplit(input$scaf_edit, "\n")[[1]]
-    updateCheckboxGroupInput(session, "scaf_auto", NULL, choices =  choices, selected =  choices)
+    updateCheckboxGroupInput(session, "chained_seq", NULL, choices =  choices, selected =  choices)
     
     shinyjs::hide("EditBox")
     shinyjs::show("CheckBox")
@@ -799,8 +796,29 @@ server <- function(input, output, session) {
     shinyjs::hide("check")
   })
   
+  
+  observeEvent(input$export,{
+    shiny::validate(need(input$chained_seq, ""))
+    
+    out_dir <- file.path(rv$projDir,"groups/")
+    dir.create(out_dir, showWarnings = FALSE)
+    
+    groups_created <- list.files(out_dir)
+    
+      super_seq <- data.table(name = input$chained_seq) %>%
+      .[, ':='(name = substr(name, 2, length(name)),
+               rc=ifelse(grepl("\\+", name), 0, 1),
+               q = ".", gap_size = ".")]
+  
+      group_name = paste0(out_dir, length(groups_created) + 1,".ordering")
+      write.table(super_seq, group_name, row.names = FALSE, col.names = FALSE, quote = FALSE) 
+
+  })
+  
+  
+  
   observe({
-    chr <- input$scaf_auto
+    chr <- input$chained_seq
     
     if(length(chr) > 1){
       disable("seq2")
@@ -810,11 +828,10 @@ server <- function(input, output, session) {
       disable_switch = FALSE
     }
     
-    if(length(chr) == 0) return(NULL)
+    if(length(chr) == 0) 
+      return(NULL)
     
     leading_seq <- ifelse(input$dir2 == 'Backward', chr[1], chr[length(chr)])
-    #leading_seq_reverse <- ifelse(grepl("^-", leading_seq), TRUE, FALSE)
-    #strand_2 <- substr(leading_seq, 1, 1)
     
     updatePickerInput(session, "seq2", selected = gsub("^[-+]","",leading_seq))
     shinyWidgets::updateSwitchInput(session, "strand_2", value = substr(leading_seq, 1, 1) == "+", disabled = disable_switch)
@@ -827,8 +844,8 @@ server <- function(input, output, session) {
     withBusyIndicatorServer("combineMaps",{
       withProgress(message = 'Preparing contact data', value = 1, 
                    detail = "please be patient ...", {
-                     #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$scaf_auto}
-                     maps <- input$scaf_auto
+                     #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$chained_seq}
+                     maps <- input$chained_seq
                      
                      rv$combined_maps <- join_maps_plus(mat = rv$mat_binned, seq = maps, direction = "Forward", 
                                                         output = "data", binsize = isolate(rv$binsize))
