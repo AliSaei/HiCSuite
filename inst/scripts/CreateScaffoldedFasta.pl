@@ -22,7 +22,7 @@ use strict;
 # Post-Lachesis step: Take the Lachesis output orderings/orientations and use them to create a new fasta file.
 #
 # Syntax:
-# CreateScaffoldedFasta.pl <assembly-fasta-file> <OUTPUT_DIR>
+# CreateScaffoldedFasta.pl <assembly-fasta-file> <INPUT_DIR> <OUTPUT_DIR> <output_fasta_name>
 #
 # Inputs:
 # -- Assembly fasta file.
