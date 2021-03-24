@@ -298,9 +298,9 @@ server <- function(input, output, session) {
                        .[rv$sequence_length, on = c("mrnm" = "rname"), ':='(mrnm_len = i.rname_len)] %>%
                        .[((pos < edge_slc | pos > rname_len - edge_slc) & (mpos < edge_slc | mpos > mrnm_len - edge_slc)),] %>%
                        .[, ':='(rname_strand = ifelse(pos < edge_slc, "-", 
-                                                   ifelse(pos > rname_len - edge_slc, "+", "M")),
+                                                      ifelse(pos > rname_len - edge_slc, "+", "M")),
                                 mrnm_strand = ifelse(mpos < edge_slc, "+", 
-                                                  ifelse(mpos > mrnm_len - edge_slc, "-", "M")),
+                                                     ifelse(mpos > mrnm_len - edge_slc, "-", "M")),
                                 edge_rname = ifelse(rname_len < edge_slc, rname_len, edge_slc),
                                 edge_mrnm = ifelse(mrnm_len < edge_slc, mrnm_len, edge_slc))] %>%
                        .[order(rname_len, decreasing = TRUE), .(link_no = .N, sum = sum(n), 
@@ -800,19 +800,24 @@ server <- function(input, output, session) {
   observeEvent(input$export,{
     shiny::validate(need(input$chained_seq, ""))
     
-    out_dir <- file.path(rv$projDir,"groups/")
+    out_dir <- file.path(rv$projDir,"groups")
     dir.create(out_dir, showWarnings = FALSE)
     
-    groups_created <- list.files(out_dir)
+    n <- length(list.files(out_dir))
     
-      super_seq <- data.table(name = input$chained_seq) %>%
-      .[, ':='(name = substr(name, 2, length(name)),
+    if(n != 0){
+      n = n + 1
+    }
+    
+    
+    super_seq <- data.table(name = input$chained_seq) %>%
+      .[, ':='(name = substr(name, 2, nchar(name)),
                rc=ifelse(grepl("\\+", name), 0, 1),
-               q = ".", gap_size = ".")]
-  
-      group_name = paste0(out_dir, length(groups_created) + 1,".ordering")
-      write.table(super_seq, group_name, row.names = FALSE, col.names = FALSE, quote = FALSE) 
-
+               q = ".", 
+               gap_size = ".")]
+    
+    file = paste0(out_dir, "/group",n,".ordering")
+    write.table(super_seq, file, row.names = FALSE, col.names = FALSE, quote = FALSE) 
   })
   
   

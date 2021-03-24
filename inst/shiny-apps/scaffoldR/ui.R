@@ -287,7 +287,7 @@ shinyUI(fluidPage(
                          ),
                          div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 2px;  background-color: white; ",
                              div(id =  "ScafConfig", style = "padding: 5px; display: none;",
-                                 div(style = "height:350px;",
+                                 div(style = "height:360px;",
                                      fluidRow(style = "margin: 0px;",
                                               radioGroupButtons("dir2", "Leading sequence:", size = "xs",
                                                                 choices = c(`<i class='glyphicon glyphicon-backward'></i>` = "Backward", 
@@ -343,11 +343,17 @@ shinyUI(fluidPage(
                                      div(style = "margin-top: 0px;",
                                          withBusyIndicatorUI(
                                            actionButton("add", "Add to scaffold", class = "action_button", 
-                                                        icon = icon("paired", lib = "glyphicon"))
+                                                        icon = icon("add", lib = "glyphicon"))
                                          )
                                      )
                                  ),
-                                 div(style = "margin-top: 20px; margin-bottom: 10px;",
+                                 div(
+                                   div("Leading sequence numbers:", style = "width: 175px; float: left; padding: 6px 2px 6px 2px;; border: 1px solid lightgray; height: 34px; border-radius: 3px; background: #F4F4F4; margin: top: 2px; font-weight:550;"),
+                                   div(style = "width: calc(100% - 175px); float: left;",
+                                       numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1)
+                                   )
+                                 ),
+                                 div(style = "margin-top: 0px; margin-bottom: 10px;",
                                      fluidRow(style = "margin: 0px;",
                                               div(style = "width: 35px; float: left;",
                                                   actionBttn("edit", NULL, icon = icon('edit', lib = "glyphicon"), 
@@ -360,13 +366,13 @@ shinyUI(fluidPage(
                                                              style = "material-circle", size = "xs"),
                                                   actionBttn("clipbtn", NULL, icon = icon('copy', lib = "glyphicon"), 
                                                              style = "material-circle", size = "xs"),
-                                                  actionBttn("export", NULL, icon = icon('export', lib = "glyphicon"), 
+                                                  actionBttn("export", NULL, icon = icon('save', lib = "glyphicon"), 
                                                              style = "material-circle", size = "xs")
                                               ),
                                               
                                               div(style = "width: calc(100% - 35px); float: left;",
-                                                  div(id = "CheckBox", style = "border: 1px solid #F0F0F0; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 500px; overflow-y: auto; background: white;",
-                                                      checkboxGroupInput("scaf_auto", "Scaffold:", choices = NULL)
+                                                  div(id = "CheckBox", style = "border: 1px solid #F0F0F0; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow-y: auto; background: white;",
+                                                      checkboxGroupInput("chained_seq", "Scaffold:", choices = NULL)
                                                   ),
                                                   hidden(
                                                     div(id = "EditBox" , style = "margin-top: 0px;",
@@ -375,15 +381,8 @@ shinyUI(fluidPage(
                                                                       width = '100%', height = "300px")
                                                     )
                                                   )
-                                              ),
-                                              conditionalPanel(
-                                                condition = "input.scaf_auto.length > 1",
-                                                div("Leading sequence number:", style = "width: 160px; float: left; padding: 6px; border: 1px solid lightgray; height: 34px; border-radius: 3px; background: #F4F4F4; margin: top: 2px;"),
-                                                div(style = "width: calc(100% - 160px); float: left;",
-                                                    numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1)
-                                                )
                                               )
-                                     ),
+                                              ),
                                      conditionalPanel(
                                        condition = "input.inputType == 'Manual'",
                                        div(style = "margin-top: -15px;",
@@ -399,7 +398,7 @@ shinyUI(fluidPage(
                    div(style = "margin-left: 5px; float: left; width: calc(100% - 305px);",  
                        div(style = "border-left: 2px solid lightgray; border-bottom: 2px solid lightgray;",
                            div(
-                             actionButton("vwJointMap", "View Map",icon = icon("table"), width = "200px"),
+                             actionButton("vwJointMap", "Scaffolding View",icon = icon("table"), width = "200px"),
                              tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
                            ),
                            
@@ -425,7 +424,7 @@ shinyUI(fluidPage(
                                     )
                            ),
                            div(
-                             actionButton("vwJointMap2", "View Scaffold Map",icon = icon("table"), width = "200px"),
+                             actionButton("vwJointMap2", "Intra-scaffold Map",icon = icon("table"), width = "200px"),
                              tags$style(HTML("#vwJointMap2{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; 
                         padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
                            ),

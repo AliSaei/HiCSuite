@@ -74,5 +74,10 @@ $("#exitZoom").attr('title', 'Exit zoom');
 $("#clearBrush").attr('title', 'Clear cut line');
 $("#cut2").attr('title', 'Cut sequence');
 $("#svChanges").attr('title', 'Save change to the set data directory');
+$("#export").attr('title', 'Save to data directory');
+$("#edit").attr('title', 'Edit');
+$("#clipbtn").attr('title', 'Copy to clipboard');
+$("#erase").attr('title', 'Clear list');
+$("#check").attr('title', 'Ok');
 });
 
