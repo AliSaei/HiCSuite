@@ -355,7 +355,7 @@ server <- function(input, output, session) {
     })
   })
   
-  output$interseqData <- DT::renderDT({
+  output$interseqData <- DT::renderDataTable({
     DT::datatable(rv$interseq_links ,
                   escape = FALSE, filter = 'bottom', rownames= FALSE, 
                   class = 'nowrap display compact order-column cell-border stripe', 
@@ -803,18 +803,14 @@ server <- function(input, output, session) {
     out_dir <- file.path(rv$projDir,"groups")
     dir.create(out_dir, showWarnings = FALSE)
     
-    n <- length(list.files(out_dir))
-    
-    if(n != 0){
-      n = n + 1
-    }
-    
-    
     super_seq <- data.table(name = input$chained_seq) %>%
       .[, ':='(name = substr(name, 2, nchar(name)),
                rc=ifelse(grepl("\\+", name), 0, 1),
                q = ".", 
                gap_size = ".")]
+    
+    # get next group number
+    n <- length(list.files(out_dir))
     
     file = paste0(out_dir, "/group",n,".ordering")
     write.table(super_seq, file, row.names = FALSE, col.names = FALSE, quote = FALSE) 
@@ -826,15 +822,14 @@ server <- function(input, output, session) {
     chr <- input$chained_seq
     
     if(length(chr) > 1){
-      disable("seq2")
-      disable_switch = TRUE
+      disable("seq2"); disable_switch = TRUE;
     } else {
-      enable("seq2")
-      disable_switch = FALSE
+      enable("seq2"); disable_switch = FALSE;
     }
     
-    if(length(chr) == 0) 
+    if(length(chr) == 0){
       return(NULL)
+    }
     
     leading_seq <- ifelse(input$dir2 == 'Backward', chr[1], chr[length(chr)])
     
