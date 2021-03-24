@@ -24,7 +24,7 @@ shinyUI(fluidPage(
                                            yes = tags$i(class = "fa fa-circle", 
                                                         style = "color: black"),
                                            no = tags$i(class = "fa fa-circle-o", 
-                                                       style = "color: #F0F0F0"))),
+                                                       style = "color: white"))),
                        div(style = "margin-top: -13px;",
                            conditionalPanel(
                              condition = "input.mapSrc == 'Local'",
@@ -59,7 +59,7 @@ shinyUI(fluidPage(
                                                  yes = tags$i(class = "fa fa-circle", 
                                                               style = "color: black"),
                                                  no = tags$i(class = "fa fa-circle-o", 
-                                                             style = "color: #F0F0F0"))),
+                                                             style = "color: white"))),
                              div(style = "margin-top: -13px;",
                                  conditionalPanel(
                                    condition = "input.lenSrc == 'Local'",
@@ -71,15 +71,10 @@ shinyUI(fluidPage(
                                                                   width = "100%",showTick = TRUE)
                                        )
                                    )
-                                 ),
-                                 conditionalPanel(
-                                   condition = "input.lenSrc == 'Archive'"
-                                   
                                  )
                              )
                          )
                        ),
-                       
                        div(style = "margin-top: 0px;",
                            withBusyIndicatorUI(
                              actionButton("import_data", "Import Data", class = "action_button",
@@ -132,7 +127,7 @@ shinyUI(fluidPage(
                                                yes = tags$i(class = "fa fa-circle", 
                                                             style = "color: black"),
                                                no = tags$i(class = "fa fa-circle-o", 
-                                                           style = "color: #F0F0F0"))),
+                                                           style = "color: white"))),
                            
                            div(style = "margin-top: -13px;",
                                pickerInput("seq1", NULL, choices = "", 
@@ -149,7 +144,7 @@ shinyUI(fluidPage(
                                                      yes = tags$i(class = "fa fa-circle", 
                                                                   style = "color: black"),
                                                      no = tags$i(class = "fa fa-circle-o", 
-                                                                 style = "color: #F0F0F0"))
+                                                                 style = "color: white"))
                                  ),
                                  div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 5px; margin-top: -13px; background-color: #F0F0F0;",
                                      conditionalPanel(
@@ -248,31 +243,44 @@ shinyUI(fluidPage(
                                                    yes = tags$i(class = "fa fa-circle", 
                                                                 style = "color: black"),
                                                    no = tags$i(class = "fa fa-circle-o", 
-                                                               style = "color: #F0F0F0"))),
+                                                               style = "color: white"))),
                                conditionalPanel(
                                  condition = "input.lnkDataSrc == 'Calculate'",
-                               fluidRow(style = "margin: 0px;",
-                                        numericInput("edgeSize3", "Edge Size:", value = 1, 
-                                                     min = 0, max = 500000, step= 10000),
-                                        div(style = "margin-top: -13px;",
-                                            sliderInput("edgeSize4", NULL, value = 0,
-                                                        min = 0,  max = 0, width = '100%', ticks = TRUE)
-                                        ),
-                                        div(style = "margin-top: -30px;",
-                                            withBusyIndicatorUI(
-                                              actionButton("calcIntraction2", "Calculate", class = "action_button",
-                                                           icon = icon('calculator', lib = "font-awesome"))
-                                            )
-                                        )
-                               )
+                                 fluidRow(style = "margin: 0px;",
+                                          numericInput("edgeSize3", "Edge Size:", value = 1, 
+                                                       min = 0, max = 500000, step= 10000),
+                                          div(style = "margin-top: -13px;",
+                                              sliderInput("edgeSize4", NULL, value = 0,
+                                                          min = 0,  max = 0, width = '100%', ticks = TRUE)
+                                          ),
+                                          div(style = "margin-top: -30px;",
+                                              withBusyIndicatorUI(
+                                                actionButton("calcIntraction2", "Calculate", class = "action_button",
+                                                             icon = icon('calculator', lib = "font-awesome"))
+                                              )
+                                          )
+                                 )
                                ),
                                conditionalPanel(
-                                 condition = "input.lnkDataSrc == 'Import'"
+                                 condition = "input.lnkDataSrc == 'Import'",
+                                 div(style = "margin-top: -12px;",
+                                     pickerInput("lnkFile", NULL, choices = NULL , multiple = FALSE,
+                                                 options = list(style = "btn-default btn-md btn-picker", size = 20, 
+                                                                `live-search` = TRUE,  tickIcon = "glyphicon-ok", 
+                                                                width = "100%",showTick = TRUE)
+                                     ),
+                                     div(style = "margin-top: 0px;",
+                                         withBusyIndicatorUI(
+                                           actionButton("importLnkFile", "Import", class = "action_button",
+                                                        icon = icon('import', lib = "glyphicon"))
+                                         )
+                                     )
+                                 )
                                )
                            )
                        ),
                        conditionalPanel(
-                         condition = "input.calcIntraction2 || input.calcIntraction1",
+                         condition = "input.calcIntraction2 || input.calcIntraction1 || importLnkFile",
                          tags$button(id = "scafConfig", class = "btn btn-default btn-md btn-accordion",
                                      list(NULL, label = "Scaffolding"),
                                      htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
@@ -289,7 +297,7 @@ shinyUI(fluidPage(
                                                                   yes = tags$i(class = "fa fa-circle", 
                                                                                style = "color: black"),
                                                                   no = tags$i(class = "fa fa-circle-o", 
-                                                                              style = "color: #F0F0F0")))
+                                                                              style = "color: white")))
                                      ),
                                      fluidRow(style = "margin: -15px 0 0 0;", 
                                               pickerInput("seq2", NULL, choices = "", width = '100%', multiple = FALSE,
@@ -351,11 +359,13 @@ shinyUI(fluidPage(
                                                   actionBttn("erase", NULL, icon = icon('erase', lib = "glyphicon"), 
                                                              style = "material-circle", size = "xs"),
                                                   actionBttn("clipbtn", NULL, icon = icon('copy', lib = "glyphicon"), 
+                                                             style = "material-circle", size = "xs"),
+                                                  actionBttn("export", NULL, icon = icon('export', lib = "glyphicon"), 
                                                              style = "material-circle", size = "xs")
                                               ),
                                               
                                               div(style = "width: calc(100% - 35px); float: left;",
-                                                  div(id = "CheckBox", style = "border: 1px solid #F0F0F0; padding: 5px; border-radius: 3px; min-height: 85px; max-height: 300px; overflow-y: auto; background: white;",
+                                                  div(id = "CheckBox", style = "border: 1px solid #F0F0F0; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 500px; overflow-y: auto; background: white;",
                                                       checkboxGroupInput("scaf_auto", "Scaffold:", choices = NULL)
                                                   ),
                                                   hidden(
@@ -392,27 +402,27 @@ shinyUI(fluidPage(
                              actionButton("vwJointMap", "View Map",icon = icon("table"), width = "200px"),
                              tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
                            ),
-
+                           
                            fluidRow(id = "VwJointMap",  style = "margin: 2px 0 0 1px;",
-                             tabsetPanel(
-                               tabPanel("Table", 
-                                        div(style = "border: 1px solid #F0F0F0; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
-                                            div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px;",
-                                                DT::DTOutput("interseqData") 
-                                            )
-                                        ),
-                                        downloadButton("interseqLinks", "Download All Data")
-                               ),
-                               tabPanel("Plot", 
-                                        div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df; font-size: 12px; font-family: Tahoma; margin: 5px 5px 0px 5px; ",
-                                            actionBttn("exitZoom2", NULL, icon = icon('home', lib = "glyphicon"), style = "material-circle", size = "xs"),
-                                            actionBttn("clearBrush2", NULL, icon = icon('erase', lib = "glyphicon"), style = "material-circle", size = "xs"),
-                                            div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
-                                                plotOutput("map1", width = "auto", height = "auto", brush = "map1_brush",hover = hoverOpts(id = "map1_hover")) 
-                                            )
-                                        )
-                               )
-                             )
+                                    tabsetPanel(
+                                      tabPanel("Table", 
+                                               div(style = "border: 1px solid #F0F0F0; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
+                                                   div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px;",
+                                                       DT::DTOutput("interseqData") 
+                                                   ),
+                                                   downloadButton("interseqLinks", "Download All Data")
+                                               )
+                                      ),
+                                      tabPanel("Plot", 
+                                               div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df; font-size: 12px; font-family: Tahoma; margin: 5px 5px 0px 5px; ",
+                                                   actionBttn("exitZoom2", NULL, icon = icon('home', lib = "glyphicon"), style = "material-circle", size = "xs"),
+                                                   actionBttn("clearBrush2", NULL, icon = icon('erase', lib = "glyphicon"), style = "material-circle", size = "xs"),
+                                                   div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
+                                                       plotOutput("map1", width = "auto", height = "auto", brush = "map1_brush",hover = hoverOpts(id = "map1_hover")) 
+                                                   )
+                                               )
+                                      )
+                                    )
                            ),
                            div(
                              actionButton("vwJointMap2", "View Scaffold Map",icon = icon("table"), width = "200px"),

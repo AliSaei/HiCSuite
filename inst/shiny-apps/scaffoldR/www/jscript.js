@@ -17,10 +17,6 @@ $('#intConfig1').click(function(){
   $('#IntConfig1').slideToggle();
 });
 
-$('#intConfig2').click(function(){
-  $('#IntConfig2').slideToggle();
-});
-
 $('#vwIntraMap').click(function(){
   $('#IntraMap').slideToggle();
 	//$('#dSwitch').toggleClass('hide');
@@ -52,6 +48,12 @@ $('#vwJointMap2').click(function(){
   $('#VwJointMap').slideUp();
    $('#VwIntData').slideUp();
   $('#VwJointMap2').slideToggle();
+});
+
+
+$('#intConfig2').click(function(){
+  $('#IntConfig2').slideToggle();
+  $('#ScafConfig').slideUp();
 });
 
 $('#scafConfig').click(function(){
