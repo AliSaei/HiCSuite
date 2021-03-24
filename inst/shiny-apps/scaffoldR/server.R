@@ -14,8 +14,8 @@ shinyOptions(progress.style="old")
 #negate %in% 
 `%!in%` = Negate(`%in%`)
 
-source("../../../R/join_maps.R")
-source("../../../R/join_maps_plus.R")
+#source("../../../R/join_maps.R")
+#source("../../../R/join_maps_plus.R")
 
 #library(readxl)
 #anchored_contigs <- read_excel("/Volumes/workspace/hrpazs/bilberry_genome/chr_bilberry.xlsx", 
