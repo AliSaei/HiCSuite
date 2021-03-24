@@ -55,10 +55,10 @@ mkdir -p $LOG
 module load fastp/0.19.4
 
 COMMAND="fastp \
---in1 $RAW/PG_PETUNIA_HiC_HJTG3DSXX_ATGAGC_L004_R1.fastq.gz \
---out1 $OUT/PG_PETUNIA_HiC_HJTG3DSXX_ATGAGC_L004_trimmed_R1.fastq.gz \
---in2 $RAW/PG_PETUNIA_HiC_HJTG3DSXX_ATGAGC_L004_R2.fastq.gz \
---out2 $OUT/PG_PETUNIA_HiC_HJTG3DSXX_ATGAGC_L004_trimmed_R2.fastq.gz \
+--in1 $RAW/Hic_R1.fastq.gz \
+--out1 $OUT/Hic_trimmed_R1.fastq.gz \
+--in1 $RAW/Hic_R2.fastq.gz \
+--out1 $OUT/Hic_trimmed_R2.fastq.gz \
 --trim_tail1 25 \
 --trim_tail2 25 \
 --disable_trim_poly_g \
@@ -162,8 +162,8 @@ for bam in $BAM
 # generating contact file
 
 command="samtools view $ASSEMBLY_RAGOO_MAP | \
-/workspace/hrpazs/bilberry_genome/filter_reads.awk -v isize=0 q=0 | \
-/workspace/hrpazs/software/dryhic/inst/src/reads_to_bins_whole.awk -v w=100 > \
-$WORKDIR/mapped_ragoo_contact_map_100_qualFilt.txt"
-bsub -J convert -o $WORKDIR/mapped_ragoo_convert_to_contactMap_100.out -e $WORKDIR/mapped_ragoo_convert_to_contactMap_100.err $command
+./scripts/filter_reads.awk -v isize=0 q=0 | \
+./scripts/bam_to_bins.awk -v w=100 > \
+$WORKDIR/contact_map_100_qualFilt.txt"
+bsub -J convert -o $WORKDIR/contactMap_100.out -e $WORKDIR/contactMap_100.err $command
 ```
