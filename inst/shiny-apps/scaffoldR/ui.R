@@ -224,7 +224,7 @@ shinyUI(fluidPage(
       ),
       div(
         actionButton("vwScaf", "Build Scaffold",icon = icon("table"), width = "285px"),
-        tags$style(HTML("#vwScaf{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; 
+        tags$style(HTML("#vwScaf{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; font-family: Tahoma;
                         padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
       ),
       fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
@@ -390,6 +390,11 @@ shinyUI(fluidPage(
                                                          placeholder = "please enter one id per line", width = '100%', height = "300px")
                                        )
                                      )
+                                 ),
+                                 div(style = "font-size: 12px;",
+                                     withBusyIndicatorUI(
+                                       actionButton("combineMaps", "Build whole map", class = "action_button", width = '100%')
+                                     )
                                  )
                              )
                          )
@@ -430,11 +435,6 @@ shinyUI(fluidPage(
                            ),
                            fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
                                     div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
-                                        div(style = "border: 1px solid lightgray; width: 100%; padding: 7px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
-                                            withBusyIndicatorUI(
-                                              actionButton("combineMaps", "Build scaffold map", class = "action_button")
-                                            )
-                                        ),
                                         div(style = "width: calc(100% - 270px); float: left;",
                                             div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",
                                                 div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
