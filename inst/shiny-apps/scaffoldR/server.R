@@ -49,7 +49,7 @@ server <- function(input, output, session) {
   rv <- reactiveValues(chr = NULL, s2.1 = NULL, cut_pos = 0, 
                        intramap_range = NULL,  btn_val2 = c(0,0))
   
-  volumes <- c(Home = fs::path_home(), getVolumes()(), `Test Data Directory` = "../../")
+  volumes <- c(Home = fs::path_home(), getVolumes()(), `Test Data Directory` = "../../../")
   
   shinyDirChoose(input, 'directory', roots = volumes, session = session,
                  restrictions = system.file(package = "base"))
@@ -563,6 +563,7 @@ server <- function(input, output, session) {
   observe({
     shiny::validate(need(input$seq2, ""))
     shiny::validate(need(rv$interseq_links, ""))
+    shiny::validate(need(input$nrSeq, ""))
     
     len <- length(isolate(input$chained_seq))
     seq2 <- input$seq2
