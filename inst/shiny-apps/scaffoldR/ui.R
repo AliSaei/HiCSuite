@@ -1,6 +1,6 @@
 library(shiny)
 library(shinyWidgets)
-library(HiCSuite)
+#library(HiCSuite)
 library(dplyr)
 library(shinycustomloader)
 library(shinyjs)
@@ -119,7 +119,7 @@ shinyUI(fluidPage(
       ),
       fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; padding: 1px; font-family: Tahoma; font-size: 12px; ",
                div(id = "IntraMap", style = "height: calc(100% + 160px);",
-                   div(style = "border: 1px solid lightgray; width: 100%; padding: 10px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
+                   div(style = "border: 1px solid lightgray; width: 100%; padding: 2px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
                        div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 10px;  background-color: white;",
                            radioGroupButtons("dir1", "Sequence:", size = "xs",
                                              choices = c(`<i class='glyphicon glyphicon-backward'></i>` = "Backward", 
@@ -231,7 +231,7 @@ shinyUI(fluidPage(
       ),
       fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
                div(id = "VwScaf", style ="height: calc(100% + 160px); display: none;",
-                   div(style = "border: 1px solid lightgray; width: 100%; padding: 7px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
+                   div(style = "border: 1px solid lightgray; width: 100%; padding: 5px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
                        #div("Setting", icon("triangle-bottom", class = "glyph-icon", lib = "glyphicon")),
                        tags$button(id = "intConfig2", class = "btn btn-default btn-md btn-accordion",
                                    list(NULL, label = "Inter-sequence Links"),
@@ -411,14 +411,6 @@ shinyUI(fluidPage(
                            
                            fluidRow(id = "VwJointMap",  style = "margin: 2px 0 0 1px;",
                                     tabsetPanel(
-                                      tabPanel("Table", 
-                                               div(style = "border: 1px solid #F0F0F0; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
-                                                   div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px;",
-                                                       DT::DTOutput("interseqData") 
-                                                   ),
-                                                   downloadButton("interseqLinks", "Download All Data")
-                                               )
-                                      ),
                                       tabPanel("Plot", 
                                                div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df; font-size: 12px; font-family: Tahoma; margin: 5px 5px 0px 5px; ",
                                                    actionBttn("exitZoom2", NULL, icon = icon('home', lib = "glyphicon"), style = "material-circle", size = "xs"),
@@ -426,6 +418,14 @@ shinyUI(fluidPage(
                                                    div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
                                                        plotOutput("map1", width = "auto", height = "auto", brush = "map1_brush",hover = hoverOpts(id = "map1_hover")) 
                                                    )
+                                               )
+                                      ),
+                                      tabPanel("Table", 
+                                               div(style = "border: 1px solid #F0F0F0; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
+                                                   div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px;",
+                                                       DT::DTOutput("interseqData") 
+                                                   ),
+                                                   downloadButton("interseqLinks", "Download All Data")
                                                )
                                       )
                                     )
