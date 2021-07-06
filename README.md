@@ -1,2 +1,2 @@
 # HiCSuite
-A tool for scaffolding genome using Hi-C data
+A novel tool for chromosome level scaffolding of genome using Hi-C data
