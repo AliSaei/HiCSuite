@@ -4,16 +4,11 @@ library(dplyr)
 library(ggplot2)
 library(shinyWidgets)
 library(shinycustomloader)
-library(shiny)
-library(shinyWidgets)
-library(dplyr)
-library(shinycustomloader)
 library(shinyjs)
 library(shinyFiles)
 
-options(future.globals.maxSize = 50*1024^2,
+options(future.globals.maxSize = 300*1024^2,
         shiny.maxRequestSize=300*1024^2)
-shinyOptions(progress.style="old")
 
 #negate %in% 
 `%!in%` = Negate(`%in%`)
@@ -46,9 +41,11 @@ source("./helpers.R")
 
 
 server <- function(input, output, session) {
+  shinyOptions(progress.style = "old")
   rv <- reactiveValues(chr = NULL, s2.1 = NULL, cut_pos = 0, 
                        intramap_range = NULL,  btn_val2 = c(0,0))
   
+  ## shiny files set up
   volumes <- c(Home = fs::path_home(), getVolumes()(), `Test Data Directory` = "../../../")
   
   shinyDirChoose(input, 'directory', roots = volumes, session = session,
@@ -74,17 +71,20 @@ server <- function(input, output, session) {
                                                               length(txt_list)), "background-color: lightgray;")))
   })
   
+  
+  ## Import contact map genearted using the jupyternote book script from BAM file
   observeEvent(input$import_data,{
     withBusyIndicatorServer("import_data", {
       withProgress(message = 'Loading in progress',
                    detail = 'Please wait...', value = 1,{
-                     updatePickerInput(session, "seq1", selected = "")
+                     #updatePickerInput(session, "seq1", selected = "")
                      
                      rv$mat <- as.data.table(readRDS(file.path(rv$projDir,input$mapFile))) 
                      
                      ## calculate or import length of sequences
                      if(input$loadSeqLen){
-                       rv$sequence_length <- fread(file.path(rv$projDir,input$lenFile), col.names = c("rname","rname_len"), select = c(1, 2)) 
+                       rv$sequence_length <- fread(file.path(rv$projDir,input$lenFile), 
+                                                   col.names = c("rname","rname_len"), select = c(1, 2)) 
                      } else {
                        rv$sequence_length <- rv$mat[,.(rname_len = max(pos)), by = .(rname)]
                      }
@@ -108,8 +108,10 @@ server <- function(input, output, session) {
                      updateNumericInput(session, "edgeSize3",  value = 20 * binsize_ini, min = binsize_ini, 
                                         step = binsize_ini , max = 500000)
                      
+                     updatePickerInput(session, "seq", choices = choices, choicesOpt = choices_opt)
                      updatePickerInput(session, "seq1", choices = choices, choicesOpt = choices_opt)
-                     updatePickerInput(session, "seq2", choices = c( "", choices), selected = input$seq2, choicesOpt = choices_opt)
+                     updatePickerInput(session, "seq2", choices = c( "", choices), 
+                                       selected = input$seq2, choicesOpt = choices_opt)
                      
                      rv$binsize_ini <- binsize_ini
                      rv$binsize <- binsize_ini
@@ -150,23 +152,23 @@ server <- function(input, output, session) {
   })
   
   
-  # intarmap view
+  ##------------------------------------------------------------------------------------------------------------
+  ##------------------------------------------------------------------------------------------------------------  
+  # click events on intar-map view
   observe({
     shiny::validate(need(rv$mat_binned, ""))
-    if(is.null(input$intramap_dblclick)) return(NULL)
+    if(is.null(input$intramap_dblclick)) 
+      return(NULL)
     
     xy_str <- function(e) {
       if(is.null(e)) return(NULL)
       round(e$x/rv$binsize, 0) * rv$binsize
     }
+    
     updateRadioGroupButtons(session, 'action', selected = "Cut")
     updateNumericInput(session, "cutPos", value = xy_str(input$intramap_dblclick))
   })
   
-  
-  observeEvent(input$cutPos,{
-    rv$cut_pos <- input$cutPos
-  })
   
   # brush event
   observe({
@@ -185,14 +187,17 @@ server <- function(input, output, session) {
   })
   
   
+  observe(rv$cut_pos <- input$cutPos)
+  
+  ##--- cut sequence
   observeEvent(input$cut1 + input$cut2,{
-    shiny::validate(need(rv$cut_pos > 0, ""))
+    shiny::validate(need(input$cutPos > 0, ""))
     
     withBusyIndicatorServer("cut1", {
       withProgress(message = 'Cutting the sequence',
                    detail = 'please wait ...', value = 1,{
                      
-                     tgt_contig <- input$seq1
+                     tgt_contig <- input$seq
                      tgt_len <- rv$sequence_length[rname == tgt_contig, rname_len]
                      subseq_start <- rv$cut_pos + rv$binsize
                      subseq_contig <- paste0(tgt_contig, "_subseq_", subseq_start, ":", tgt_len)
@@ -210,7 +215,7 @@ server <- function(input, output, session) {
                      updateNumericInput(session, "cutPos", value = 0)
                      
                      choices <- c(rv$seq_name, subseq_contig)
-                     updatePickerInput(session, "seq1", choices = choices, selected = tgt_contig,
+                     updatePickerInput(session, "seq", choices = choices, selected = tgt_contig,
                                        choicesOpt = list(style = paste(rep_len("font-size: 12px; line-height: 1.5; 
                                                                                margin-left: -10px; border-bottom: 1px solid gray;", 
                                                                                length(choices)), "background-color: lightgray;")))
@@ -220,50 +225,6 @@ server <- function(input, output, session) {
     })
   })
   
-  observeEvent(input$join,{
-    shiny::validate(need(input$subseq1, ""))
-    
-    withBusyIndicatorServer("join", {
-      withProgress(message = 'Joining the sequences',
-                   detail = 'please wait ...', value = 1, {
-                     
-                     tgt_contig <- input$seq1
-                     subseq_contig <- input$subseq1
-                     
-                     strand <- ifelse(input$strand_1, "+", "-")
-                     new_contig <- paste0(tgt_contig, "|", strand,"|", subseq_contig)
-                     
-                     tgt_len <- max(rv$mat_binned[rname == tgt_contig, pos])
-                     subseq_len <- max(rv$mat_binned[rname == subseq_contig, pos])
-                     new_contig_len <- tgt_len + subseq_len
-                     subseq_start <- tgt_len + rv$binsize
-                     
-                     rv$mat_binned <- rv$mat_binned %>%
-                       #.[(rname %in% tgt_contig | mrnm %in% tgt_contig),] %>%
-                       .[, ':='(pos = ifelse(rname == subseq_contig,  pos + subseq_start, pos ),
-                                mpos = ifelse(mrnm == subseq_contig , mpos + subseq_start , mpos))] %>%
-                       .[,':='(rname = ifelse(rname %in% c(tgt_contig, subseq_contig), new_contig, rname),
-                               mrnm = ifelse(mrnm %in% c(tgt_contig, subseq_contig), new_contig, mrnm))]
-                     
-                     rv$sequence_length <- rv$sequence_length %>%
-                       rbind(.,list(new_contig, new_contig_len))
-                     
-                     choices <- rv$mat_binned[,.(rname, rname_len = max(pos)), 
-                                              by = .(rname)][order(-rname_len), rname]
-                     choices_style <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
-                                                                 border-bottom: 1px solid gray;", length(choices)), 
-                                                         "background-color: lightgray;"))
-                     
-                     updatePickerInput(session, "seq1", choices = choices, selected = new_contig,
-                                       choicesOpt = choices_style)
-                     
-                     updatePickerInput(session, "subseq1", selected = "")
-                     
-                     #set plot size to default
-                     rv$intramap_range <- NULL
-                   })
-    })
-  })
   
   observe({
     updateSliderInput(session, "edgeSize2", value = input$edgeSize1, 
@@ -276,7 +237,7 @@ server <- function(input, output, session) {
   })
   
   
-  ## this allows user to calculate inter-sequence links on the fly
+  ## this allows user to calculate inter-sequence links
   observeEvent(input$calcIntraction1 + input$calcIntraction2, {
     shiny::validate(need(rv$mat_binned, ""))
     
@@ -324,6 +285,10 @@ server <- function(input, output, session) {
                                                                border-bottom: 1px solid gray;", length(choices)), 
                                                        "background-color: lightgray;"))
                      
+                     updatePickerInput(session, "seq", 
+                                       choices = c( "", choices), selected = isolate(input$seq),
+                                       choicesOpt = choices_opt)
+                     
                      updatePickerInput(session, "seq1", 
                                        choices = c( "", choices), selected = isolate(input$seq1),
                                        choicesOpt = choices_opt)
@@ -342,6 +307,7 @@ server <- function(input, output, session) {
     })
   })
   
+  ## or users can just import pre-calculated link density file
   observeEvent(input$importLnkFile, {
     withBusyIndicatorServer("importLnkFile", {
       withProgress(message = 'Importing link density file',
@@ -420,11 +386,6 @@ server <- function(input, output, session) {
   
   ##------------------------------------------------------------------------------------------------------------
   ##------------------------------------------------------------------------------------------------------------
-  observeEvent(input$svChanges, {
-    withBusyIndicatorServer("svChanges", {
-      saveRDS(rv$mat, paste(Sys.Date(), "_", basename(input$mapFile), sep=""))
-    })
-  })
   
   # click event to link density
   observe({
@@ -481,30 +442,14 @@ server <- function(input, output, session) {
   })
   
   observe({
-    shiny::validate(need(input$seq1, ""))
+    shiny::validate(need(input$seq, ""))
     input$cut1
     input$cut2
     
-    if(isolate(input$action == "Join")){
-      if(is.null(input$subseq1)) 
-        return(NULL)
-      
-      seq <- input$seq1
-      rv$seq_len <- max(rv$mat_binned[rname == seq, pos])
-      
-      strand <- ifelse(input$strand_1, "+", "-")
-      subseq = paste0(strand,input$subseq1)
-      
-      p <- join_maps_plus(rv$mat_binned, seq = seq, subseq = subseq, 
-                          direction = isolate(input$dir1), 
-                          binsize = isolate(rv$binsize), 
-                          output = "data")
-    } else {
-      p <- rv$mat_binned[rname == input$seq1 & mrnm == input$seq1, ]
-      
-      if(nrow(p) == 0) 
-        return(NULL)
-    }
+    p <- rv$mat_binned[rname == input$seq & mrnm == input$seq, ]
+    
+    if(nrow(p) == 0) 
+      return(NULL)
     
     p <- p %>% ggplot(aes(x = pos, y = mpos, fill=log10(n/2))) +
       geom_tile(size = 0.2) +
@@ -520,9 +465,8 @@ server <- function(input, output, session) {
             panel.border = element_rect(colour = "gray", fill = NA),
             panel.background = element_rect(fill = "white", colour = "white"))
     
-    
+    rv$cut_pos <- 0
     rv$intramap_plot <- p
-    rv$tgt_pos <- NULL
   })
   
   output$intramap <- renderPlot({
@@ -531,18 +475,19 @@ server <- function(input, output, session) {
     if(!is.null(rv$intramap_range)){
       p <- rv$intramap_plot +
         coord_cartesian(ylim = rv$intramap_range, 
-                        xlim = rv$intramap_range) +
-        geom_vline(xintercept = c(rv$seq_len, rv$cut_pos)	, color = "red", size = 0.3) +
-        geom_hline(yintercept = c(rv$seq_len, rv$cut_pos), color = "red", size = 0.3) 
+                        xlim = rv$intramap_range) 
       
       session$resetBrush("intramap_brush")
     } else {
-      p <- rv$intramap_plot +
-        geom_vline(xintercept = c(rv$seq_len, rv$cut_pos)	, color = "red", size = 0.3) +
-        geom_hline(yintercept = c(rv$seq_len, rv$cut_pos), color = "red", size = 0.3) 
+      p <- rv$intramap_plot 
     }
     
-    p
+    if(rv$cut_pos > 0){
+      p + geom_vline(xintercept = rv$cut_pos, color = "red", size = 0.3) +
+        geom_hline(yintercept = rv$cut_pos, color = "red", size = 0.3)
+    } else {
+      p
+    }
     
   }, height = function(){
     if(is.null(input$dimension[2])){
@@ -556,6 +501,100 @@ server <- function(input, output, session) {
     } else {
       0.798 * input$dimension[2]
     }
+  })
+  
+  
+  ###--------------------------------
+  ##----------------join-------------
+  ###--------------------------------
+ output$joinedmap <- renderPlot({
+    shiny::validate(need(input$action == "Join", ""))
+    shiny::validate(need(input$seq1, ""))
+    shiny::validate(need(input$subseq1, ""))
+    shiny::validate(need(rv$interseq_links, ""))
+    
+    seq <- input$seq1
+    subseq = paste0(strand, input$subseq1)
+    strand <- ifelse(input$strand_1, "+", "-")
+    
+    join_maps(rv$mat_binned, seq = seq, subseq = subseq, 
+                        direction = isolate(input$dir1), 
+                        binsize = isolate(rv$binsize), 
+                        output = "graph")
+    
+
+    
+  }, height = function(){
+    if(is.null(input$dimension[2])){
+      400
+    } else {
+      0.798 * input$dimension[2]
+    }
+  }, width = function(){
+    if(is.null(input$dimension[2])){
+      400
+    } else {
+      0.798 * input$dimension[2]
+    }
+  })
+  
+  
+  
+  
+  
+  observeEvent(input$join,{
+    shiny::validate(need(input$subseq1, ""))
+    
+    withBusyIndicatorServer("join", {
+      withProgress(message = 'Joining the sequences',
+                   detail = 'please wait ...', value = 1, {
+                     
+                     tgt_contig <- input$seq1
+                     subseq_contig <- input$subseq1
+                     
+                     strand <- ifelse(input$strand_1, "+", "-")
+                     new_contig <- paste0(tgt_contig, "|", strand,"|", subseq_contig)
+                     
+                     tgt_len <- max(rv$mat_binned[rname == tgt_contig, pos])
+                     subseq_len <- max(rv$mat_binned[rname == subseq_contig, pos])
+                     new_contig_len <- tgt_len + subseq_len
+                     subseq_start <- tgt_len + rv$binsize
+                     
+                     rv$mat_binned <- rv$mat_binned %>%
+                       #.[(rname %in% tgt_contig | mrnm %in% tgt_contig),] %>%
+                       .[, ':='(pos = ifelse(rname == subseq_contig,  pos + subseq_start, pos ),
+                                mpos = ifelse(mrnm == subseq_contig , mpos + subseq_start , mpos))] %>%
+                       .[,':='(rname = ifelse(rname %in% c(tgt_contig, subseq_contig), new_contig, rname),
+                               mrnm = ifelse(mrnm %in% c(tgt_contig, subseq_contig), new_contig, mrnm))]
+                     
+                     rv$sequence_length <- rv$sequence_length %>%
+                       rbind(.,list(new_contig, new_contig_len))
+                     
+                     choices <- rv$mat_binned[,.(rname, rname_len = max(pos)), 
+                                              by = .(rname)][order(-rname_len), rname]
+                     choices_style <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
+                                                                 border-bottom: 1px solid gray;", length(choices)), 
+                                                         "background-color: lightgray;"))
+                     
+                     updatePickerInput(session, "seq", choices = choices, selected = new_contig,
+                                       choicesOpt = choices_style)
+                     updatePickerInput(session, "seq1", choices = choices, selected = new_contig,
+                                       choicesOpt = choices_style)
+                     
+                     updatePickerInput(session, "subseq1", selected = "")
+                     
+                     #set plot size to default
+                     rv$intramap_range <- NULL
+                   })
+    })
+  })
+  
+
+  ###--------save changes----------- 
+  observeEvent(input$svChanges, {
+    withBusyIndicatorServer("svChanges", {
+      saveRDS(rv$mat, paste(Sys.Date(), "_", basename(input$mapFile), sep=""))
+    })
   })
   
   ##------------------------------------------------------------------------------------------------------------

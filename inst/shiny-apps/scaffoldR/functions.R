@@ -79,9 +79,9 @@ join_maps_plus <- function(mat, seq, subseq = NULL,  binsize, direction = "Forwa
   maps <- gsub("^\\s+|\\s$", "", c(seq, subseq))
   n = length(maps)
   
-  
-  d <- setdiff(gsub("^-|^[+]","",maps),unique(mat$rname))
-  if(length(d) > 0 ) stop(paste0('"', paste0(d, collapse = ","),'"', "does not exist"))
+  d <- setdiff(gsub("^-|^[+]","", maps), unique(mat$rname))
+  if(length(d) > 0 ) 
+    stop(paste0('"', paste0(d, collapse = ","),'"', " does not exist."))
   
   
   if(n < 3) {
