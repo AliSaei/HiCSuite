@@ -13,7 +13,6 @@ $('#dtBin').click(function(){
 });
 
 $('#intConfig1').click(function(){
-    $('#DtBin').slideUp();
   $('#IntConfig1').slideToggle();
 });
 
@@ -53,12 +52,6 @@ $('#vwJointMap2').click(function(){
 
 $('#intConfig2').click(function(){
   $('#IntConfig2').slideToggle();
-  $('#ScafConfig').slideUp();
-});
-
-$('#scafConfig').click(function(){
-  $('#IntConfig2').slideUp();
-  $('#ScafConfig').slideToggle();
 });
 
   // reset the app when the button pressed

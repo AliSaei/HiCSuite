@@ -10,9 +10,6 @@ library(shinyFiles)
 options(future.globals.maxSize = 300*1024^2,
         shiny.maxRequestSize=300*1024^2)
 
-#negate %in% 
-`%!in%` = Negate(`%in%`)
-
 #source("../../../R/join_maps.R")
 #source("../../../R/join_maps_plus.R")
 source("./functions.R")
@@ -37,8 +34,6 @@ source("./helpers.R")
 #  file = paste0(out_dir, i,".ordering")
 #  write.table(data, file, row.names = FALSE, col.names = FALSE, quote = FALSE) 
 #}
-
-
 
 server <- function(input, output, session) {
   shinyOptions(progress.style = "old")
@@ -452,12 +447,12 @@ server <- function(input, output, session) {
       return(NULL)
     
     p <- p %>% ggplot(aes(x = pos, y = mpos, fill=log10(n/2))) +
-      geom_tile(size = 0.2) +
-      labs(title = input$seq1 , subtitle = paste0("Size: ", 
-                                                  max(p$pos/1000000), " Mb"), x = "", y = "") +
-      #scale_fill_gradient(low = "#ff9999", high = "red") +
+      geom_tile(color = "red", size = 0.1) +
+      scale_fill_gradient(low = "#ffe6e6", high = "red") +
       scale_x_continuous(expand=c(0,0)) +
       scale_y_continuous(expand=c(0,0)) +
+      labs(title = input$seq1 , subtitle = paste0("Size: ", 
+                                                  max(p$pos/1000000), " Mb"), x = "", y = "") +
       #coord_cartesian(ylim=c(-12,12)) +
       theme(axis.text = element_blank(),
             axis.ticks = element_blank(), 
@@ -507,22 +502,42 @@ server <- function(input, output, session) {
   ###--------------------------------
   ##----------------join-------------
   ###--------------------------------
- output$joinedmap <- renderPlot({
+  
+  joinedmap_data <- reactive({
     shiny::validate(need(input$action == "Join", ""))
     shiny::validate(need(input$seq1, ""))
     shiny::validate(need(input$subseq1, ""))
     shiny::validate(need(rv$interseq_links, ""))
     
-    seq <- input$seq1
+    strand <- ifelse(input$subseq1_strand, "+", "-")
     subseq = paste0(strand, input$subseq1)
-    strand <- ifelse(input$strand_1, "+", "-")
     
-    join_maps(rv$mat_binned, seq = seq, subseq = subseq, 
-                        direction = isolate(input$dir1), 
-                        binsize = isolate(rv$binsize), 
-                        output = "graph")
+    join_maps(rv$mat_binned, seq = input$seq1, subseq = subseq, 
+              direction = input$dir1, 
+              binsize = isolate(rv$binsize))
+  })
+  
+  
+  output$joinedmap <- renderPlot({
+    shiny::validate(need(joinedmap_data(), ""))
     
-
+    len <- joinedmap_data()[, .(len= max(pos)), 
+                            by = .(rname)] %>%
+      .[len == min(len), ]
+    
+    ggplot(joinedmap_data(),aes(x = pos, y = mpos, fill=log10(n))) +
+      geom_tile(color = "red", size = 0.1) +
+      scale_fill_gradient(low = "#ffe6e6", high = "red") +
+      labs(title = paste("Total size:", max(len$len)/1000000, "MB"), 
+           subtitle = len$rname[1], x = "", y = "") +
+      scale_x_continuous(expand=c(0,0)) +
+      scale_y_continuous(expand=c(0,0)) +
+      geom_vline(xintercept = len$len	, color = "blue", size = 0.1) +
+      geom_hline(yintercept = len$len	, color = "blue", size = 0.1) +
+      theme(axis.text = element_blank(),
+            axis.ticks = element_blank(), 
+            legend.position = "none",
+            panel.background = element_rect(fill = "white", colour = "white"))
     
   }, height = function(){
     if(is.null(input$dimension[2])){
@@ -552,8 +567,13 @@ server <- function(input, output, session) {
                      tgt_contig <- input$seq1
                      subseq_contig <- input$subseq1
                      
-                     strand <- ifelse(input$strand_1, "+", "-")
-                     new_contig <- paste0(tgt_contig, "|", strand,"|", subseq_contig)
+                     strand <- ifelse(input$subseq1_strand, "+", "-")
+                     
+                     if(input$dir1 == "Forward"){
+                       new_scaffold <- paste0("+", tgt_contig," & ",strand, subseq_contig)
+                     } else {
+                       new_scaffold <- paste0(strand, subseq_contig, " & +",tgt_contig)
+                     }
                      
                      tgt_len <- max(rv$mat_binned[rname == tgt_contig, pos])
                      subseq_len <- max(rv$mat_binned[rname == subseq_contig, pos])
@@ -564,11 +584,11 @@ server <- function(input, output, session) {
                        #.[(rname %in% tgt_contig | mrnm %in% tgt_contig),] %>%
                        .[, ':='(pos = ifelse(rname == subseq_contig,  pos + subseq_start, pos ),
                                 mpos = ifelse(mrnm == subseq_contig , mpos + subseq_start , mpos))] %>%
-                       .[,':='(rname = ifelse(rname %in% c(tgt_contig, subseq_contig), new_contig, rname),
-                               mrnm = ifelse(mrnm %in% c(tgt_contig, subseq_contig), new_contig, mrnm))]
+                       .[,':='(rname = ifelse(rname %in% c(tgt_contig, subseq_contig), new_scaffold, rname),
+                               mrnm = ifelse(mrnm %in% c(tgt_contig, subseq_contig), new_scaffold, mrnm))]
                      
                      rv$sequence_length <- rv$sequence_length %>%
-                       rbind(.,list(new_contig, new_contig_len))
+                       rbind(.,list(new_scaffold, new_contig_len))
                      
                      choices <- rv$mat_binned[,.(rname, rname_len = max(pos)), 
                                               by = .(rname)][order(-rname_len), rname]
@@ -576,11 +596,11 @@ server <- function(input, output, session) {
                                                                  border-bottom: 1px solid gray;", length(choices)), 
                                                          "background-color: lightgray;"))
                      
-                     updatePickerInput(session, "seq", choices = choices, selected = new_contig,
+                     updatePickerInput(session, "seq", choices = choices, 
+                                       selected = new_scaffold,
                                        choicesOpt = choices_style)
-                     updatePickerInput(session, "seq1", choices = choices, selected = new_contig,
+                     updatePickerInput(session, "seq1", choices = choices,
                                        choicesOpt = choices_style)
-                     
                      updatePickerInput(session, "subseq1", selected = "")
                      
                      #set plot size to default
@@ -589,7 +609,7 @@ server <- function(input, output, session) {
     })
   })
   
-
+  
   ###--------save changes----------- 
   observeEvent(input$svChanges, {
     withBusyIndicatorServer("svChanges", {
@@ -620,11 +640,17 @@ server <- function(input, output, session) {
       }
     }
     
+
     if(input$dir2 == "Backward"){
-      rv$subseq2 <- rv$interseq_links[mrnm %in% leading_seq & (!rname %in% leading_seq) & link_density <= maxLinkDen & rname_len >= minSeqLen,] %>%
+      rv$subseq2 <- rv$interseq_links[mrnm %in% leading_seq & 
+                                        (!rname %in% leading_seq) & 
+                                        link_density <= maxLinkDen & 
+                                        rname_len >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), .(x = rname, x_dir = rname_strand)] 
     } else {
-      rv$subseq2 <- rv$interseq_links[rname %in% leading_seq & (!mrnm %in% leading_seq) & link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
+      rv$subseq2 <- rv$interseq_links[rname %in% leading_seq & 
+                                        (!mrnm %in% leading_seq) & 
+                                        link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), .(x = mrnm, x_dir = mrnm_strand)]
     }
     
@@ -638,9 +664,10 @@ server <- function(input, output, session) {
     rv$choices <- c(unique(rv$subseq2.1$x), chr)
     
     updatePickerInput(session, "subseq2", choices =  rv$choices,
-                      choicesOpt = list(style = paste(rep_len("font-size: 12px; line-height: 1.5; 
+                      choicesOpt = list(
+                        style = paste(rep_len("font-size: 12px; line-height: 1.5; 
                                                               margin-left: -10px; border-bottom: 1px solid gray;", 
-                                                              length(rv$choices)), "background-color: lightgray;")))
+                                              length(rv$choices)), "background-color: lightgray;")))
     shinyWidgets::updateSwitchInput(session, "strand_3", value = rv$subseq2.1$x_dir[1] == "+")
   })
   
@@ -700,47 +727,51 @@ server <- function(input, output, session) {
           }
         }
       }
-      rv$sel_map <- join_maps_plus(rv$mat_binned, seq = rv$s1, subseq = rv$s2.1, binsize = isolate(rv$binsize),  
-                                   direction = input$dir2, output = "data")
+      
+      print(rv$s1)
+      rv$scaffold_map <- join_maps_plus(rv$mat_binned, seq = rv$s1, subseq = rv$s2.1, 
+                                   binsize = isolate(rv$binsize),  
+                                   direction = input$dir2)
     })
   })
   
   
   observe({
-    shiny::validate(need(rv$sel_map, ""))
-    shiny::validate(need(input$seq1, ""))
+    shiny::validate(need(rv$scaffold_map, ""))
+
+    len <- rv$scaffold_map[, .(len = min(pos)), by = .(rname)] %>%
+      .[len == max(len), ]
     
-    len <- rv$sel_map[, .(len = min(pos)), by = .(rname)] %>%
-      .[order(len), ]
-    
-    p <- ggplot(rv$sel_map, aes(x = pos, y = mpos, fill=log10(n/2))) +
-      geom_tile( size = 0.2) +
-      #scale_fill_gradient(low = "#ff9999", high = "red") +
-      labs(title = isolate(rv$s2.1) , subtitle = paste0("Total size: ", max(len$len/1000000), " Mb"), x = "", y = "") +
+    rv$map1_plot <- ggplot(rv$scaffold_map, aes(x = pos, y = mpos, fill=log10(n/2))) +
+      geom_tile(color = "red", size = 0.1) +
+      scale_fill_gradient(low = "#ffe6e6", high = "red") +
+      labs(title = isolate(rv$s2.1) , subtitle = paste0("Total size: ", 
+                                                        max(len$len/1000000), " Mb"), 
+           x = "", y = "") +
       scale_x_continuous(expand=c(0,0)) +
       scale_y_continuous(expand=c(0,0)) +
-      geom_vline(xintercept = len$len, color = "gray", size = 0.3) +
-      geom_hline(yintercept = len$len, color = "gray", size = 0.3) +
+      geom_vline(xintercept = len$len, color = "blue", size = 0.3) +
+      geom_hline(yintercept = len$len, color = "blue", size = 0.3) +
       #coord_cartesian(ylim=c(-12,12)) +
       theme(axis.text = element_blank(),
             axis.ticks = element_blank(), 
             legend.position = "none",
             panel.border = element_rect(colour = "gray", fill = NA),
             panel.background = element_rect(fill = "white", colour = "white"))
-    
-    if(!is.null(rv$map1_range)){
-      p <- p + coord_cartesian(ylim = rv$map1_range, xlim = rv$map1_range) 
-      session$resetBrush("map1_brush")
-    }
-    
-    rv$map1_plot <- p 
   })
   
   
   output$map1 <- renderPlot({
     shiny::validate(need(rv$map1_plot, ""))
-    rv$map1_plot 
     
+    if(!is.null(rv$map1_range)){
+      p <- rv$map1_plot + coord_cartesian(ylim = rv$map1_range, xlim = rv$map1_range) 
+      session$resetBrush("map1_brush")
+    } else {
+      p <- rv$map1_plot
+    }
+    
+    p
     
   }, height = function(){
     if(is.null(input$dimension[2])){
@@ -757,9 +788,10 @@ server <- function(input, output, session) {
   })
   
   observe({
-    shiny::validate(need(rv$sel_map, ""))
+    shiny::validate(need(rv$scaffold_map, ""))
     
-    if(is.null(input$map1_brush)) return(NULL)
+    if(is.null(input$map1_brush)) 
+      return(NULL)
     
     xy_range_str <- function(e) {
       if(is.null(e)) return(NULL)
@@ -785,7 +817,7 @@ server <- function(input, output, session) {
     shiny::validate(need(rv$combined_maps, ""))
     # For base graphics, we need to specify columns, though for ggplot2,
     # it's usually not necessary.
-    res <- nearPoints(rv$sel_map, input$map_hover, "pos", "mpos", threshold = 1, maxpoints = 1)
+    res <- nearPoints(rv$scaffold_map, input$map_hover, "pos", "mpos", threshold = 1, maxpoints = 1)
     if (nrow(res) == 0)
       return()
     res
@@ -893,8 +925,8 @@ server <- function(input, output, session) {
                      #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$chained_seq}
                      maps <- input$chained_seq
                      
-                     rv$combined_maps <- join_maps_plus(mat = rv$mat_binned, seq = maps, direction = "Forward", 
-                                                        output = "data", binsize = isolate(rv$binsize))
+                     rv$combined_maps <- join_maps_plus(mat = rv$mat_binned, seq = maps, 
+                                                        direction = "Forward", binsize = isolate(rv$binsize))
                      
                      #fwrite(chr, paste0("./","chr",chr_no,"_",n, ".csv"), row.names = FALSE)
                      #saveRDS(chr, paste0("chr1",chr_no,".rds"))
