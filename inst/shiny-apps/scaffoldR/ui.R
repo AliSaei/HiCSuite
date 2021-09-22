@@ -9,8 +9,8 @@ library(shinyFiles)
 source("./helpers.R")
 
 shinyUI(
-  fluidPage(
-    div(style = "position: fixed; height: 100%; background: #ece9df; padding: 10px; width: 250px; border-right: 1px solid lightgray; font-family: tahoma; font-size: 12px;",
+  fluidPage(style = "font-family: Tahoma;",
+    div(style = "position: fixed; height: 100%; background: #ece9df; padding: 10px; width: 250px; border-right: 1px solid #E8E8E8; font-family: Tahoma; font-size: 12px;",
         div(style = "text-align: center; font-weight: 600; font-size: 18px; background-color: white; padding: 5px; border-radius: 5px;",
             span("ScaffoldR")
         ),
@@ -19,7 +19,7 @@ shinyUI(
                              list(NULL, label = "Data Input"),
                              htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                  ),
-                 div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 10px;",
+                 div(style = "border: 1px solid #E8E8E8; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 10px;",
                      div(id =  "DataInput", style = "padding: 10px;",
                          radioGroupButtons("mapSrc", "Contact data:", choices = c("Local", "Remote"), selected = "Local", 
                                            justified = TRUE, size = "xs", status = "gray", 
@@ -45,8 +45,8 @@ shinyUI(
                                )
                              ),
                              conditionalPanel(
-                               condition = "input.mapSrc == 'Remote'"
-                               
+                               condition = "input.mapSrc == 'Remote'",
+                               selectizeInput("remoteSrc", NULL, choices = "DropBox")
                              )
                          ),
                          div(
@@ -87,10 +87,10 @@ shinyUI(
                      )
                  ),
                  tags$button(id = "dtBin", class = "btn btn-default btn-md btn-accordion",
-                             list(NULL, label = "Update Binning"),
+                             list(NULL, label = "Binning Update"),
                              htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                  ),
-                 div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 10px;",
+                 div(style = "border: 1px solid #E8E8E8; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 10px;",
                      div(id = "DtBin" , style = "padding: 10px;",
                          
                          fluidRow(style = "margin: 0px;",
@@ -100,7 +100,7 @@ shinyUI(
                                   ),
                                   div(style = "margin-top: -30px;",
                                       withBusyIndicatorUI(
-                                        actionButton("update_bin", "Update Binning", class = "action_button",
+                                        actionButton("update_bin", "Update", class = "action_button",
                                                      icon = icon('play', lib = "glyphicon"))
                                       )
                                   )
@@ -114,12 +114,24 @@ shinyUI(
     ),
     div(style = "margin-left: 250px;",   
         div(
-          actionButton("vwIntraMap", "View Intramap",icon = icon("table"), width = "285px"),
-          tags$style(HTML("#vwIntraMap{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; 
-                        padding-top: 5px; padding-bottom: 5px; font-weight: 550; margin-top: 10px; margin-left: -5px;}"))
+          actionButton("vwData", "Data View",icon = icon("table"), width = "285px", class= "slide-btn")
         ),
-        fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; padding: 1px; font-family: Tahoma; font-size: 12px; ",
-                 div(id = "IntraMap", style = "height: calc(100% + 160px);",
+        fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; padding: 1px; font-family: Tahoma; font-size: 12px; ",
+                 div(id = "DataView", style = "height: calc(100% + 160px);",
+                     div(style = "width: 285px; float: left; border: 1px solid #E8E8E8; border-radius: 3px; padding: 2px;",
+                     DT::DTOutput('seqLen')
+                     ),
+                     div(style = "float: left; width: calc(100% - 290px); border: 1px solid #E8E8E8; border-radius: 3px; margin-left: 5px; padding: 5px;",
+                            DT::DTOutput('contactData')
+                     )
+                 )
+        ),
+        
+        div(
+          actionButton("vwIntraMap", "View Intramap",icon = icon("table"), width = "285px", class = 'slide-btn')
+        ),
+        fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; padding: 1px;",
+                 div(id = "IntraMap", style = "height: calc(100% + 160px); display: none;",
                      fluidRow(style = "margin: 0px; background-color: #F4F4F4;; height: 32px;",
                               radioGroupButtons("action", NULL, 
                                                 choices = c("View","Cut", "Join"), 
@@ -132,14 +144,14 @@ shinyUI(
                                                 #              style = "color: white"))
                               )
                      ),
-                     div(style = "border: 1px solid lightgray; width: 100%; padding: 5px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
+                     div(style = "border: 1px solid #E8E8E8; width: 100%; padding: 5px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
                          conditionalPanel(
                            condition = "input.action == 'Join'",
                            tags$button(id = "intConfig1", class = "btn btn-default btn-md btn-drop",
                                        list(NULL, label = "Inter-sequence Links"),
                                        htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                            ),
-                           div(style = "border: 1px solid lightgray; padding: 1px; background-color: white; margin-bottom: 10px;",
+                           div(style = "border: 1px solid #E8E8E8; padding: 1px; background-color: white; margin-bottom: 10px;",
                                div(id ="IntConfig1", style = "padding: 10px;",
                                    fluidRow(style = "margin: 0px;",
                                             numericInput("edgeSize1", "Edge Size:", value = 1, 
@@ -160,7 +172,7 @@ shinyUI(
                            
                            conditionalPanel(
                              condition = "input.calcIntraction1 != 0 | input.calcIntraction2 != 0",
-                             div(style = "border: 1px solid lightgray; padding: 7px; background-color: white; margin-bottom: 0px; margin-top: -5px; border-radius: 3px;",
+                             div(style = "border: 1px solid #E8E8E8; padding: 7px; background-color: white; margin-bottom: 0px; margin-top: -5px; border-radius: 5px;",
                                  radioGroupButtons("dir1", "Leading Sequence:", size = "xs",
                                                    choices = c(`<i class='glyphicon glyphicon-backward'></i>` = "Backward", 
                                                                `<i class='glyphicon glyphicon-forward'></i>` = "Forward"), 
@@ -196,7 +208,7 @@ shinyUI(
                          ),
                          conditionalPanel(
                            condition = "input.action != 'Join'",
-                           div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 10px;  background-color: white;",
+                           div(style = "border: 1px solid #E8E8E8; border-radius: 3px; padding: 10px;  background-color: white;",
                                pickerInput("seq", "Sequence:", choices = "", 
                                            width = '100%', multiple = FALSE,
                                            options = list(style = "btn-default btn-md btn-picker", 
@@ -222,11 +234,11 @@ shinyUI(
                            condition = "input.join | input.cut1 | input.cut ",
                            actionButton("svChanges", "Save changes", width = '100%', class = "dbutt", 
                                         icon = icon("floppy-disk", lib = "glyphicon")), 
-                           tags$head(tags$style(".dbutt{width: 100%; background: lightgray !important; font-size: 12px; margin-top: 2px;}"))
+                           tags$head(tags$style(".dbutt{width: 100%; background: #E8E8E8 !important; font-size: 12px; margin-top: 2px;}"))
                          )
                      ),
                      div(style = "width: calc(100% - 270px); float: left;",
-                         div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; padding: 10px; background: #ece9df; margin: 0px 5px 5px 5px; font-size: 12px; font-family: Tahoma;",
+                         div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 0px 5px 5px 5px; font-size: 12px;",
                              conditionalPanel(
                                condition = "input.action != 'Join'",
                                actionBttn("exitZoom1", NULL, icon = icon('home', lib = "glyphicon"), style = "material-circle", size = "xs"),
@@ -234,8 +246,11 @@ shinyUI(
                                actionBttn("cut2", NULL, icon = icon('scissors', lib = "glyphicon"), style = "material-circle", size = "xs"),
                                div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
                                    #sliderInput("range", label = NULL, min = 0, max = 100, value = c(0, 100), ticks = FALSE, width = '100%'),
-                                   plotOutput("intramap", width = "auto", height = "auto", dblclick = "intramap_dblclick",  brush = "intramap_brush", click = "intramap_click")
-                               )
+                                   plotOutput("intramap", width = "auto", height = "auto", 
+                                              dblclick = "intramap_dblclick",  
+                                              brush = "intramap_brush", 
+                                              click = "intramap_click")
+                                   )
                              ),
                              conditionalPanel(
                                condition = "input.action == 'Join'",
@@ -244,7 +259,7 @@ shinyUI(
                                    plotOutput("joinedmap", width = "auto", height = "auto", 
                                               brush = "joinedmap_brush", 
                                               click = "joinedmap_click") %>%
-                                     withLoader(type="html", loader="loader5")
+                                     withLoader(type = "html", loader="loader5")
                                )
                              )
                          )
@@ -252,19 +267,17 @@ shinyUI(
                  )
         ),
         div(
-          actionButton("vwScaf", "Build Scaffold",icon = icon("table"), width = "285px"),
-          tags$style(HTML("#vwScaf{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; font-family: Tahoma;
-                        padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
+          actionButton("vwScaf", "Build Scaffold",icon = icon("table"), width = "285px", class= "slide-btn")
         ),
-        fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
+        fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
                  div(id = "VwScaf", style ="height: calc(100% + 160px); display: none;",
-                     div(style = "border: 1px solid lightgray; width: 100%; padding: 5px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
+                     div(style = "border: 1px solid #E8E8E8; width: 100%; padding: 5px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
                          #div("Setting", icon("triangle-bottom", class = "glyph-icon", lib = "glyphicon")),
                          tags$button(id = "intConfig2", class = "btn btn-default btn-md btn-accordion",
                                      list(NULL, label = "Inter-sequence Links"),
                                      htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                          ),
-                         div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 0px;",
+                         div(style = "border: 1px solid #E8E8E8; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 0px;",
                              div(id = "IntConfig2", style = "padding: 5px;",
                                  radioGroupButtons("lnkDataSrc", "Data source:", choices = c("Calculate", "Import"), 
                                                    selected = "Calculate", 
@@ -276,7 +289,7 @@ shinyUI(
                                                                  style = "color: white"))),
                                  conditionalPanel(
                                    condition = "input.lnkDataSrc == 'Calculate'",
-                                   fluidRow(style = "margin: -12px 0 0 0; border-top: 1px solid lightgray; padding-top: 5px;",
+                                   fluidRow(style = "margin: -12px 0 0 0; border-top: 1px solid #E8E8E8; padding-top: 5px;",
                                             numericInput("edgeSize3", "Edge Size:", value = 1, 
                                                          min = 0, max = 500000, step= 10000),
                                             div(style = "margin-top: -13px;",
@@ -315,7 +328,7 @@ shinyUI(
                            #             list(NULL, label = "Scaffolding"),
                            #             htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                            # ),
-                           div(style = "border: 1px solid lightgray; border-radius: 3px; padding: 2px;  background-color: white; margin-top: 10px; ",
+                           div(style = "border: 1px solid #E8E8E8; border-radius: 5px; padding: 2px;  background-color: white; margin-top: 10px; ",
                                div(style = "padding: 5px;",
                                    div(style = "height:360px;",
                                        fluidRow(style = "margin: 0px;",
@@ -353,7 +366,7 @@ shinyUI(
                                                                                       offStatus = "primary", labelWidth = '70', handleWidth = '70')
                                                         )
                                                     ),
-                                                    div(style = "float: right; width: 70px; margin: 20px 0 0 0; border: 1px solid lightgray; padding: 1px 1px 1px 5px; border-radius: 3px; background-color: #F0F0F0; height: 33px;",
+                                                    div(style = "float: right; width: 70px; margin: 20px 0 0 0; border: 1px solid #E8E8E8; padding: 1px 1px 1px 5px; border-radius: 3px; background-color: #E8E8E8; height: 33px;",
                                                         actionBttn("down", NULL, icon = icon('arrow-down', lib = "glyphicon"), 
                                                                    style = "material-circle",  size = "xs"),
                                                         actionBttn("up", NULL, icon = icon('arrow-up', lib = "glyphicon"),
@@ -392,9 +405,10 @@ shinyUI(
                      div(style = "margin-left: 5px; float: left; width: calc(100% - 305px);",  
                              div(
                                actionButton("vwJointMap", "Scaffolding View",icon = icon("table"), width = "200px"),
-                               tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
+                               tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                               padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
                              ),
-                             fluidRow(id = "VwJointMap",  style = "margin: 2px 0 0 10px; border:  1px solid lightgray; border-radius: 5px;",
+                             fluidRow(id = "VwJointMap",  style = "margin: 2px 0 0 10px; border:  1px solid #E8E8E8; border-radius: 5px;",
                                       div(style = "width: 250px; float: left;",
                                           div(style = "margin-top: 0px; margin-bottom: 10px;",
                                               fluidRow(style = "margin: 0px;",
@@ -414,14 +428,14 @@ shinyUI(
                                                        ),
                                                        
                                                        div(style = "width: calc(100% - 35px); float: left; padding: 2px;",
-                                                           div(id = "CheckBox", style = "border: 1px solid #F0F0F0; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: #F4F4F4; margin-right: 2px;",
+                                                           div(id = "CheckBox", style = "border: 1px solid #E8E8E8; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: #F4F4F4; margin-right: 2px;",
                                                                checkboxGroupInput("chained_seq", "Scaffold:", choices = NULL)
                                                            ),
                                                            hidden(
                                                              div(id = "EditBox" , style = "margin-top: 0px;",
                                                                  textAreaInput("scaf_edit", label = NULL, value = "", 
                                                                                placeholder = "please enter one id per line", 
-                                                                               width = '100%', height = "300px")
+                                                                               width = '100%', height = '100%', resize = "vertical")
                                                              )
                                                            )
                                                        )
@@ -435,28 +449,29 @@ shinyUI(
                                               )
                                           )
                                       ),
-                                      div(style = "width: 82vh; font-size: 12px; font-family: Tahoma; float: left;",
-                                          
-                                          fluidRow(style = "margin: 2px 5px 0 5px; background: #F4F4F4; padding: 1px; height: 37px;",
-                                                   div("Number of sequences to plot from the leading end:", style = "width: 300px; float: left; padding: 7px; border: 1px solid #F4F4F4; height: 34px; border-radius: 3px;"),
+                                      div(style = "font-size: 12px; font-family: Tahoma; float: left;",
+                                          fluidRow(style = "margin: 2px 5px 0 5px; background: #F4F4F4; padding: 1px; border: 1px solid #F4F4F4; height: 37px; border-radius: 5px;",
+                                                   div("Number of sequences to plot from the leading end:", style = "width: 300px; float: left; padding: 7px;"),
                                                    div(style = "width: calc(100% - 300px); float: left;",
                                                        numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1, width = '100%')
                                                    )
                                           ),
-                                          fluidRow(style = "border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df; margin: 2px 5px 0px 5px;",
+                                          div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 0px 5px 5px 5px; font-size: 12px;",
+                                                   div(
                                               actionBttn("exitZoom2", NULL, icon = icon('home', lib = "glyphicon"), 
                                                          style = "material-circle", size = "xs"),
                                               actionBttn("clearBrush2", NULL, icon = icon('erase', lib = "glyphicon"), 
-                                                         style = "material-circle", size = "xs"),
-                                              div(style = "border: 1px solid white; border-radius: 5px; width: 80vh; margin-top: 0 0 0 5px;",
+                                                         style = "material-circle", size = "xs")
+                                              ),
+                                              div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
                                                   plotOutput("map1", width = "auto", height = "auto", 
                                                              brush = "map1_brush",
                                                              hover = hoverOpts(id = "map1_hover")) %>%
-                                                    withLoader(type="html", loader="loader5")
+                                                    withLoader(type = "html", loader="loader5")
                                               )
                                           )
                                           
-                                          # div(style = "border: 1px solid #F0F0F0; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
+                                          # div(style = "border: 1px solid #E8E8E8; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
                                           #     div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px;",
                                           #         DT::DTOutput("interseqData") 
                                           #     ),
@@ -467,13 +482,13 @@ shinyUI(
                              ),
                              div(
                                actionButton("vwJointMap2", "Intra-scaffold Map",icon = icon("table"), width = "200px"),
-                               tags$style(HTML("#vwJointMap2{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; 
+                               tags$style(HTML("#vwJointMap2{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px;  border: 1px solid #E8E8E8;
                         padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
                              ),
-                             fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #F0F0F0; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
+                             fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
                                       div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
                                           div(style = "width: calc(100% - 270px); float: left;",
-                                              div(style = "width: 82vh; border: 1px solid #F0F0F0; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",
+                                              div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",
                                                   div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
                                                       plotOutput("map2", width = "auto", height = "auto", hover = hoverOpts(id = "map2_hover")) %>%
                                                         withLoader(type="html", loader="loader5")
@@ -510,8 +525,8 @@ shinyUI(
                            .btn-update{font-size: 12px; font-family:Tahoma; width: 100%; font-weight: 550; background-color: #ece9df;}
                            .btn-dir{font-size: 12px; font-family:Tahoma; width: 100%; background-color: #F8F8F8;}
                            .btn-picker{font-size: 12px; font-family:Tahoma; background-color: #F8F8F8;}
-                           .btn-accordion{font-size: 12px; font-family:Tahoma; font-weight: 550; width: 100%; height: 30px; background-color: #F0F0F0;}
-                           .btn-drop{font-size: 12px; font-family:Tahoma; font-weight: 550; width: 100%; height: 30px; background-color: #F0F0F0; text-align: left;}
+                           .btn-accordion{font-size: 12px; font-family:Tahoma; font-weight: 550; width: 100%; height: 30px; background-color: #E8E8E8;}
+                           .btn-drop{font-size: 12px; font-family:Tahoma; font-weight: 550; width: 100%; height: 30px; background-color: #E8E8E8; text-align: left;}
                            .selectize-input { font-size: 12px; font-family: Tahoma;}
                            .selectize-dropdown { font-size: 12px; font-family: Tahoma; overflow-x: auto;}
                            .selectize-dropdown-content {max-height: 300px; padding: 0; }
@@ -519,6 +534,10 @@ shinyUI(
                            .fa {font-size: 14px;}
                            .glyph-icon {font-size: 12px;}
                            #map2_tooltip {position: absolute; pointer-events: none; width: 300px; z-index: 100; padding: 0;}
+                           .slide-btn{font-size: 12px; background-color: #ece9df; 
+                            border-top-right-radius: 30px; border: 1px solid #E8E8E8; 
+                            padding-top: 5px; padding-bottom: 5px; font-weight: 550; 
+                            margin-top: 5px; margin-left: -5px;}
                             '))
     )
     
