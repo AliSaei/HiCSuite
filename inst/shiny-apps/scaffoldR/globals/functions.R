@@ -1,3 +1,19 @@
+library(shiny)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(shinyWidgets)
+library(shinycustomloader)
+library(shinyjs)
+library(shinyFiles)
+library(DT)
+library(clipr)
+library(shinydashboard)
+
+options(future.globals.maxSize = 300*1024^2,
+        shiny.maxRequestSize=300*1024^2)
+
+
 join_maps <- function(mat, seq, subseq, binsize, direction = "Forward", output_dir = NULL){
   
   if(is.null(seq)) 
