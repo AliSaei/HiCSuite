@@ -754,7 +754,7 @@ server <- function(input, output, session) {
               options = list(
                 pageLength = 5, dom = 'lti', autoWidth = TRUE,
                 lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
-                #scrollY = "400px",
+                scrollX = TRUE,
                 initComplete = JS(
                   "function(settings, json) {",
                   "$(this.api().table().header()).css({'background-color': '#F0F0F0', 'color': '#000'});",

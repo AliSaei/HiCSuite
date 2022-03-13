@@ -191,7 +191,7 @@ shinyUI(
                                  ),
                                  fluidRow(id = "VwJointMap",  style = "margin: 2px 0 0 10px; border:  1px solid #E8E8E8; border-radius: 5px;",
                                           div(style = "font-size: 12px; font-family: Tahoma; float: left;",
-                                              fluidRow(style = "margin: 2px 5px 0 5px; background: #E8E8E8; padding: 1px; border: 1px solid #F4F4F4; height: 37px; border-radius: 5px;",
+                                              fluidRow(style = "margin: 2px 5px 0 5px; background: #ece9df; padding: 1px; border: 1px solid #F4F4F4; height: 37px; border-radius: 5px;",
                                                        div("Number of sequences to plot from the leading end:", style = "width: 300px; float: left; padding: 7px;"),
                                                        div(style = "width: calc(100% - 300px); float: left;",
                                                            numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1, width = '100%')
@@ -220,7 +220,7 @@ shinyUI(
                                               # )
                                               
                                           ),
-                                          div(style = "float: left; width: calc(100% - 85vh); padding: 5px; border: 1px solid #E8E8E8; margin: 0px;",
+                                          fluidRow(style = "float: right; width: calc(100% - 85vh); padding: 5px; border: 1px solid #E8E8E8; border-radius: 3px; margin: 1px;",
                                                 DTOutput("Subseq") 
                                           )
                                  ),
