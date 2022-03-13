@@ -5,7 +5,11 @@ $(document).ready(function(){
 // confirm befors closing the app
 window.onbeforeunload = function(e) {
   return '';
-};  
+}; 
+
+$('#vwData').click(function(){
+  $('#DataView').slideToggle();
+});
   
 // show/hide plots and table  
 $('#dtBin').click(function(){
@@ -32,7 +36,6 @@ $('#vwScaf').click(function(){
   $('#IntraMap').slideUp();
   $('#VwScaf').slideToggle();
 });
-
 
 $('#vwJointMap').click(function(){
   $('#VwJointMap').toggle();
