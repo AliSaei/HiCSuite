@@ -432,13 +432,13 @@ server <- function(input, output, session) {
     
     if(input$dir1 == "Backward"){
       subseq1 <- rv$interseq_links[mrnm %in% seq & (!rname %in% seq),] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = rname, x_dir = rname_strand)] 
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequence = rname, Strand = rname_strand)] 
     } else {
       subseq1 <- rv$interseq_links[rname %in% seq & (!mrnm %in% seq),] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(x = mrnm, x_dir = mrnm_strand)]
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequence = mrnm, Strand = mrnm_strand)]
     }
     
-    choices <- unique(subseq1$x)
+    choices <- unique(subseq1$Subsequence)
     updatePickerInput(session, "subseq1", choices = choices,
                       choicesOpt = list(style = paste(
                         rep_len("font-size: 12px; line-height: 1.5; 
@@ -774,7 +774,7 @@ server <- function(input, output, session) {
     
     if(i > length(rv$choices)) return(NULL)
     s2 <- rv$choices[i]
-    strand_3 <- rv$subseq2.1[x ==  s2, x_dir][1]
+    strand_3 <- rv$subseq2.1[Subsequence ==  s2, Strand][1]
     
     updatePickerInput(session, "subseq2",  selected = rv$choices[i])
     shinyWidgets::updateSwitchInput(session, "strand_3", value = strand_3 == "+")
@@ -786,7 +786,7 @@ server <- function(input, output, session) {
     
     if(i < 1) return(NULL)
     s2 <- rv$choices[i]
-    strand_3 <- rv$subseq2.1[x ==  s2, x_dir][1]
+    strand_3 <- rv$subseq2.1[Subsequence ==  s2, Strand][1]
     updatePickerInput(session, "subseq2",  selected = rv$choices[i])
     shinyWidgets::updateSwitchInput(session, "strand_3", value = strand_3 == "+")
   })
