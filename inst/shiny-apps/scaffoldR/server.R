@@ -834,36 +834,39 @@ server <- function(input, output, session) {
   observe({
     shiny::validate(need(scaffold_map(), ""))
     
-    # get total length
-    total_len <- max(scaffold_map()[["pos"]])
-
-    # get joining points
-    len <- scaffold_map()[,.(len = min(pos)), by = .(rname)][len != 0, ]
-    
-    join_col <- if(nrow(len) == 1){"blue"} else {c(rep_len("gray", nrow(len)-1),"blue")}
-    
-    if(isolate(input$dir2) == "Backward"){
-      join_col <- sort.default(join_col, decreasing = FALSE)
-    }
-    
-    
-    # plot
-    rv$map1_plot <- ggplot(scaffold_map(), 
-                           aes(x = pos, y = mpos, fill=log10(n/2))) +
-      geom_tile(color = "red", size = 0.1) +
-      scale_fill_gradient(low = "#ffe6e6", high = "red") +
-      labs(title = isolate(rv$s2.1) , subtitle = 
-             paste0("Total size: ", total_len/1000000, " Mb"), 
-           x = "", y = "") +
-      scale_x_continuous(expand=c(0,0)) +
-      scale_y_continuous(expand=c(0,0)) +
-      geom_vline(xintercept = len$len, color = join_col, size = 0.3) +
-      geom_hline(yintercept = len$len, color = join_col, size = 0.3) +
-      theme(axis.text = element_blank(),
-            axis.ticks = element_blank(), 
-            legend.position = "none",
-            panel.border = element_rect(colour = "gray", fill = NA),
-            panel.background = element_rect(fill = "white", colour = "white"))
+    withBusyIndicatorServer("add", {
+      
+      # get total length
+      total_len <- max(scaffold_map()[["pos"]])
+      
+      # get joining points
+      len <- scaffold_map()[,.(len = min(pos)), by = .(rname)][len != 0, ]
+      
+      join_col <- if(nrow(len) == 1){"blue"} else {c(rep_len("gray", nrow(len)-1),"blue")}
+      
+      if(isolate(input$dir2) == "Backward"){
+        join_col <- sort.default(join_col, decreasing = FALSE)
+      }
+      
+      
+      # plot
+      rv$map1_plot <- ggplot(scaffold_map(), 
+                             aes(x = pos, y = mpos, fill=log10(n/2))) +
+        geom_tile(color = "red", size = 0.1) +
+        scale_fill_gradient(low = "#ffe6e6", high = "red") +
+        labs(title = isolate(rv$s2.1) , subtitle = 
+               paste0("Total size: ", total_len/1000000, " Mb"), 
+             x = "", y = "") +
+        scale_x_continuous(expand=c(0,0)) +
+        scale_y_continuous(expand=c(0,0)) +
+        geom_vline(xintercept = len$len, color = join_col, size = 0.3) +
+        geom_hline(yintercept = len$len, color = join_col, size = 0.3) +
+        theme(axis.text = element_blank(),
+              axis.ticks = element_blank(), 
+              legend.position = "none",
+              panel.border = element_rect(colour = "gray", fill = NA),
+              panel.background = element_rect(fill = "white", colour = "white"))
+    })
   })
   
   
