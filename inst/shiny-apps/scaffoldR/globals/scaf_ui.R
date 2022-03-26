@@ -85,7 +85,7 @@ shinyUI(
                                               )
                                      ),
                                      fluidRow(style = "margin: 0px;", 
-                                              div(style = "float: left; width: calc(100% - 70px);",
+                                              div(style = "float: left; width: calc(100% - 70px); margin-top: -1px;",
                                                   pickerInput("subseq2", "Subsequence:", choices = NULL, width = '100%',
                                                               options = list(style = "btn-default btn-md btn-picker", size = 10, `live-search` = TRUE)
                                                   ),
@@ -95,11 +95,11 @@ shinyUI(
                                                                                 offStatus = "primary", labelWidth = '70', handleWidth = '70')
                                                   )
                                               ),
-                                              div(style = "float: right; width: 70px; margin: 20px 0 0 0; border: 1px solid #E8E8E8; padding: 1px 1px 1px 5px; border-radius: 3px; background-color: #E8E8E8; height: 33px;",
-                                                  actionBttn("down", NULL, icon = icon('arrow-down', lib = "glyphicon"), 
-                                                             style = "material-circle",  size = "xs"),
-                                                  actionBttn("up", NULL, icon = icon('arrow-up', lib = "glyphicon"),
-                                                             style = "material-circle", size = "xs")
+                                              div(style = "float: right; width: 70px; margin: 20px 0 0 0; padding: 1px 1px 1px 5px; height: 33px;",
+                                                  actionBttn("down1", NULL, icon = icon('arrow-down', lib = "glyphicon"), 
+                                                             style = "material-circle",  color = "default", size = "xs"),
+                                                  actionBttn("up1", NULL, icon = icon('arrow-up', lib = "glyphicon"),
+                                                             style = "material-circle",  color = "default", size = "xs")
                                               )
                                      ),
                                      p("Subsequence Filters:", style = "font-weight: 550;"),
@@ -208,7 +208,7 @@ shinyUI(
                                                       plotOutput("map1", width = "auto", height = "auto", 
                                                                  brush = "map1_brush",
                                                                  hover = hoverOpts(id = "map1_hover")) %>%
-                                                        withLoader(type = "html", loader="loader5")
+                                                        withLoader(type = "html")
                                                   )
                                               )
                                               
@@ -236,7 +236,7 @@ shinyUI(
                                                   div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",
                                                       div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
                                                           plotOutput("map2", width = "auto", height = "auto", hover = hoverOpts(id = "map2_hover")) %>%
-                                                            withLoader(type="html", loader="loader5")
+                                                            withLoader(type="html")
                                                       ),
                                                       uiOutput("map2_hoverinfo")
                                                   )

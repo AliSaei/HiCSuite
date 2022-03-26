@@ -91,9 +91,9 @@ server <- function(input, output, session) {
                      rv$max = max(rmax, mmax)
                      binsize_ini <- sort.int(unique(rv$contact_data$pos), partial = 1:2)[1:2]
                      binsize_ini = as.integer(binsize_ini[2] - binsize_ini[1])
-                     choices <- rv$seq_len[rname %in% unique(rv$contact_data[, rname]), ][order(-rname_len), rname]
+                     rv$choices <- rv$seq_len[rname %in% unique(rv$contact_data[, rname]), ][order(-rname_len), rname]
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
-                                                        border-bottom: 1px solid gray;", length(choices)), 
+                                                        border-bottom: 1px solid gray;", length(rv$choices)), 
                                                        "background-color: lightgray;"))
                      
                      updateNumericInput(session, "binsize2", value = binsize_ini, 
@@ -108,11 +108,11 @@ server <- function(input, output, session) {
                                         min = binsize_ini, 
                                         step = binsize_ini , max = 500000)
                      
-                     updatePickerInput(session, "seq", choices = choices, 
+                     updatePickerInput(session, "seq", choices = rv$choices, 
                                        choicesOpt = choices_opt)
-                     updatePickerInput(session, "seq1", choices = choices, 
+                     updatePickerInput(session, "seq1", choices = rv$choices, 
                                        choicesOpt = choices_opt)
-                     updatePickerInput(session, "seq2", choices = c( "", choices), 
+                     updatePickerInput(session, "seq2", choices = c( "", rv$choices), 
                                        selected = input$seq2, 
                                        choicesOpt = choices_opt)
                      
@@ -268,12 +268,12 @@ server <- function(input, output, session) {
                      
                      updateNumericInput(session, "cutPos", value = 0)
                      
-                     choices <- unique(rv$contact_data2[["rname"]])
-                     updatePickerInput(session, "seq", choices = choices, selected = tgt_contig,
+                     rv$choices <- unique(rv$contact_data2[["rname"]])
+                     updatePickerInput(session, "seq", choices = rv$choices, selected = tgt_contig,
                                        choicesOpt = list(style = paste(
                                          rep_len("font-size: 12px; line-height: 1.5; 
                                        margin-left: -10px; border-bottom: 1px solid gray;", 
-                                                 length(choices)), "background-color: lightgray;")))
+                                                 length(rv$choices)), "background-color: lightgray;")))
                      #set plot size to default
                      rv$intramap_range <- NULL
                    })
@@ -333,27 +333,27 @@ server <- function(input, output, session) {
                                                                 edge_rname = max(edge_rname), 
                                                                 edge_mrnm = max(edge_mrnm)), 
                          by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)] %>%
-                       .[sum > 2,.(link_density = round(link_no/(ceiling(edge_rname/rv$binsize) * 
-                                                                   ceiling(edge_mrnm/rv$binsize)),2), 
-                                   link_no, sum, avg = sum/link_no), 
+                       .[,.(link_density = round(link_no/(ceiling(edge_rname/rv$binsize) * 
+                                                            ceiling(edge_mrnm/rv$binsize)),2), 
+                            link_no, sum, avg = sum/link_no), 
                          by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)]
                      
                      #bin_rname =(link_no/ceiling(min(edge_rname,edge_mrnm)/rv$binsize))/10
-                     choices <- unique(rv$interseq_links$rname)
+                     rv$choices <- unique(rv$interseq_links$rname)
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
-                                                               border-bottom: 1px solid gray;", length(choices)), 
+                                                               border-bottom: 1px solid gray;", length(rv$choices)), 
                                                        "background-color: lightgray;"))
                      
                      updatePickerInput(session, "seq", 
-                                       choices = c( "", choices), selected = isolate(input$seq),
+                                       choices = c( "", rv$choices), selected = isolate(input$seq),
                                        choicesOpt = choices_opt)
                      
                      updatePickerInput(session, "seq1", 
-                                       choices = c( "", choices), selected = isolate(input$seq1),
+                                       choices = c( "", rv$choices), selected = isolate(input$seq1),
                                        choicesOpt = choices_opt)
                      
                      updatePickerInput(session, "seq2", 
-                                       choices = c( "", choices), selected = isolate(input$seq2),
+                                       choices = c( "", rv$choices), selected = isolate(input$seq2),
                                        choicesOpt = choices_opt)
                      
                      updateNumericInput(session, "edgeSize3", min = rv$binsize, value = edge_slc, 
@@ -491,6 +491,41 @@ server <- function(input, output, session) {
   ##------------------------------------------------------------------------------------------------------------
   #output first map
   
+  # move up and down the options list ---------------
+  observeEvent(input$down,{
+    shiny::validate(need(rv$choices, ""))
+
+    i <- which(rv$choices == input$seq)
+    i = i + 1
+    print(i)
+    
+    if(i > length(rv$choices)){
+      return(NULL)
+    } else {
+      updatePickerInput(session, "seq",  
+                        selected = rv$choices[i])
+    }
+    
+  })
+  
+  observeEvent(input$up, {
+    shiny::validate(need(rv$choices, ""))
+    
+    i <- which(rv$choices == input$seq)
+    print(i)
+    i = i - 1
+    
+    print(i)
+    if(i < 1){
+      return(NULL)
+    } else {
+      updatePickerInput(session, "seq",  
+                        selected = rv$choices[i])
+    }
+  })
+  
+  ##-------------------------------------------------------
+  ##-------------------------------------------------------
   observeEvent(input$exitZoom1, {
     session$resetBrush("intramap_brush")
     rv$intramap_range <- NULL
@@ -662,16 +697,16 @@ server <- function(input, output, session) {
                      rv$seq_len <- rv$seq_len %>%
                        rbind(.,list(new_scaffold, new_contig_len))
                      
-                     choices <- rv$contact_data2[,.(rname, rname_len = max(pos)), 
+                     rv$choices <- rv$contact_data2[,.(rname, rname_len = max(pos)), 
                                                  by = .(rname)][order(-rname_len), rname]
                      choices_style <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
-                                                                 border-bottom: 1px solid gray;", length(choices)), 
+                                                                 border-bottom: 1px solid gray;", length(rv$choices)), 
                                                          "background-color: lightgray;"))
                      
-                     updatePickerInput(session, "seq", choices = choices, 
+                     updatePickerInput(session, "seq", choices = rv$choices, 
                                        selected = new_scaffold,
                                        choicesOpt = choices_style)
-                     updatePickerInput(session, "seq1", choices = choices,
+                     updatePickerInput(session, "seq1", choices = rv$choices,
                                        choicesOpt = choices_style)
                      updatePickerInput(session, "subseq1", selected = "")
                      
@@ -734,14 +769,14 @@ server <- function(input, output, session) {
     
     chr <- gsub("^[-+]", "", c(input$chained_seq, input$scaf_man))
     rv$subseq2.1 <- rv$subseq2[(!(Subsequence %in% chr)), ]
-    rv$choices <- c(unique(rv$subseq2.1$Subsequence), chr)
+    rv$choices2 <- c(unique(rv$subseq2.1$Subsequence), chr)
     
-    updatePickerInput(session, "subseq2", choices =  rv$choices,
+    updatePickerInput(session, "subseq2", choices =  rv$choices2,
                       choicesOpt = list(
                         style = paste(
                           rep_len("font-size: 12px; line-height: 1.5; 
                                                               margin-left: -10px; border-bottom: 1px solid gray;", 
-                                  length(rv$choices)), "background-color: lightgray;")))
+                                  length(rv$choices2)), "background-color: lightgray;")))
     shinyWidgets::updateSwitchInput(session, "strand_3", value = rv$subseq2.1$Strand[1] == "+")
   })
   
@@ -766,28 +801,28 @@ server <- function(input, output, session) {
   ##---------------------------------------------------------------------------- 
   
   # move up and down the options list ---------------
-  observeEvent(input$down,{
-    shiny::validate(need(rv$choices, ""))
+  observeEvent(input$down1,{
+    shiny::validate(need(rv$choices2, ""))
     
-    i <- which(rv$choices == input$subseq2)
+    i <- which(rv$choices2 == input$subseq2)
     i = i + 1
     
-    if(i > length(rv$choices)) return(NULL)
-    s2 <- rv$choices[i]
+    if(i > length(rv$choices2)) return(NULL)
+    s2 <- rv$choices2[i]
     strand_3 <- rv$subseq2.1[Subsequence ==  s2, Strand][1]
     
-    updatePickerInput(session, "subseq2",  selected = rv$choices[i])
+    updatePickerInput(session, "subseq2",  selected = rv$choices2[i])
     shinyWidgets::updateSwitchInput(session, "strand_3", value = strand_3 == "+")
   })
   
-  observeEvent(input$up, {
-    i <- which(rv$choices == input$subseq2)
+  observeEvent(input$up1, {
+    i <- which(rv$choices2 == input$subseq2)
     i = i - 1
     
     if(i < 1) return(NULL)
-    s2 <- rv$choices[i]
+    s2 <- rv$choices2[i]
     strand_3 <- rv$subseq2.1[Subsequence ==  s2, Strand][1]
-    updatePickerInput(session, "subseq2",  selected = rv$choices[i])
+    updatePickerInput(session, "subseq2",  selected = rv$choices2[i])
     shinyWidgets::updateSwitchInput(session, "strand_3", value = strand_3 == "+")
   })
   #-------------------------------------------------
