@@ -38,7 +38,7 @@ $('#vwScaf').click(function(){
 });
 
 $('#vwJointMap').click(function(){
-  $('#VwJointMap').toggle();
+  $('#VwJointMap').slideToggle();
 });
 
 $('#vwIntData').click(function(){
