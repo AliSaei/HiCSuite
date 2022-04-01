@@ -106,11 +106,16 @@ shinyUI(
                 ),
                 fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; padding: 1px; font-family: Tahoma; font-size: 12px; ",
                          div(id = "DataView", 
-                             div(style = "width: 285px; float: left; background: #ece9df; border: 1px solid #E8E8E8; border-radius: 3px; padding: 2px;",
-                                 DT::DTOutput('seqLen')
+                             div(style = "width: 500px; float: left; background: #ece9df;",
+                                 plotOutput("lenHist")
                              ),
-                             div(style = "float: right; background: #ece9df; width: calc(100% - 290px); padding: 5px;",
-                                 DT::DTOutput('contactData')
+                             div(style = "float: left; border-top: 20px solid #ece9df; width: calc(100% - 505px);", 
+                                 div(style = "width: 250px; float: left; background: #ece9df; border: 1px solid #E8E8E8; padding: 5px; margin-top: -5px;",
+                                     DT::DTOutput('seqLen')
+                                 ),
+                                 div(style = "float: right; background: #ece9df; width: calc(100% - 260px); padding: 5px; margin-top: -1px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;",
+                                     DT::DTOutput('contactData')
+                                 )
                              )
                          )
                 ),
@@ -197,34 +202,34 @@ shinyUI(
                                  conditionalPanel(
                                    condition = "input.action != 'Join'",
                                    fluidRow(style = "border: 1px solid #E8E8E8; border-radius: 3px; padding: 10px 0 10px 10px; background-color: white; margin: 0;",
-                                       div(style = "float: left; width: calc(100% - 70px); margin-top: -1px;",
-                                       pickerInput("seq", "Sequence:", choices = "", 
-                                                   width = '100%', multiple = FALSE,
-                                                   options = list(style = "btn-default btn-md btn-picker", 
-                                                                  size = 10, `live-search` = TRUE)
-                                                   )
-                                       ),
-                                       div(style = "float: right; width: 65px; margin: 20px 0 0 5px; padding: 1px; height: 33px;",
-                                           actionBttn("down", NULL, icon = icon('arrow-down', lib = "glyphicon"), 
-                                                      style = "material-circle",  size = "xs"),
-                                           actionBttn("up", NULL, icon = icon('arrow-up', lib = "glyphicon"),
-                                                      style = "material-circle", size = "xs")
-                                       ),
-                                       
-                                       conditionalPanel(
-                                         condition = "input.seq.length > 0",
-                                         div(style = "margin-top: -5px;",
-                                             conditionalPanel(
-                                               condition = "input.action == 'Cut'",
-                                               numericInput("cutPos", "Cut position:", value = 0, 
-                                                            min = 0, max = 50000000, step= 100),
-                                               withBusyIndicatorUI(
-                                                 actionButton("cut1", "Cut Sequence", class = "action_button", 
-                                                              icon = icon('scissors', lib = "glyphicon"))
-                                               )
-                                             )
-                                         )
-                                       )
+                                            div(style = "float: left; width: calc(100% - 70px); margin-top: -1px;",
+                                                pickerInput("seq", "Sequence:", choices = "", 
+                                                            width = '100%', multiple = FALSE,
+                                                            options = list(style = "btn-default btn-md btn-picker", 
+                                                                           size = 10, `live-search` = TRUE)
+                                                )
+                                            ),
+                                            div(style = "float: right; width: 65px; margin: 20px 0 0 5px; padding: 1px; height: 33px;",
+                                                actionBttn("down", NULL, icon = icon('arrow-down', lib = "glyphicon"), 
+                                                           style = "material-circle",  size = "xs"),
+                                                actionBttn("up", NULL, icon = icon('arrow-up', lib = "glyphicon"),
+                                                           style = "material-circle", size = "xs")
+                                            ),
+                                            
+                                            conditionalPanel(
+                                              condition = "input.seq.length > 0",
+                                              div(style = "margin-top: -5px;",
+                                                  conditionalPanel(
+                                                    condition = "input.action == 'Cut'",
+                                                    numericInput("cutPos", "Cut position:", value = 0, 
+                                                                 min = 0, max = 50000000, step= 100),
+                                                    withBusyIndicatorUI(
+                                                      actionButton("cut1", "Cut Sequence", class = "action_button", 
+                                                                   icon = icon('scissors', lib = "glyphicon"))
+                                                    )
+                                                  )
+                                              )
+                                            )
                                    )
                                  ),
                                  conditionalPanel(

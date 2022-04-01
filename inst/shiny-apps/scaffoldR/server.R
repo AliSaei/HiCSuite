@@ -77,21 +77,25 @@ server <- function(input, output, session) {
                      
                      #names(rv$contact_data) <- c("rname","pos","mrnm","mpos","n")
                      
-                     ## calculate or import length of sequences
-                     if(input$loadSeqLen){
-                       rv$seq_len <- fread(file.path(rv$projDir,input$lenFile), 
-                                           col.names = c("rname","rname_len"), 
-                                           select = c(1, 2)) 
-                     } else {
-                       rv$seq_len <- rv$contact_data[,.(rname_len = max(pos)), by = .(rname)]
-                     }
-                     
-                     rmax = max(rv$contact_data$pos)
+                      rmax = max(rv$contact_data$pos)
                      mmax = max(rv$contact_data$mpos)
                      rv$max = max(rmax, mmax)
                      binsize_ini <- sort.int(unique(rv$contact_data$pos), partial = 1:2)[1:2]
                      binsize_ini = as.integer(binsize_ini[2] - binsize_ini[1])
-                     rv$choices <- rv$seq_len[rname %in% unique(rv$contact_data[, rname]), ][order(-rname_len), rname]
+                     
+                     
+                     ## calculate or import length of sequences
+                     if(input$loadSeqLen){
+                       rv$seq_len <- fread(file.path(rv$projDir,input$lenFile), 
+                                           col.names = c("rname","rlen"), 
+                                           select = c(1, 2)) 
+                     } else {
+                       rv$seq_len <- rv$contact_data[,.(rlen = max(pos)), by = .(rname)] %>%
+                         .[ , rlen := ifelse(rlen == 0, binsize_ini, rlen)]
+                     }
+                     
+                     
+                     rv$choices <- rv$seq_len[rname %in% unique(rv$contact_data[, rname]), ][order(-rlen), rname]
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
                                                         border-bottom: 1px solid gray;", length(rv$choices)), 
                                                        "background-color: lightgray;"))
@@ -156,8 +160,11 @@ server <- function(input, output, session) {
   })
   
   output$seqLen <- DT::renderDT({
-    datatable(rv$seq_len,
-              rownames = FALSE, class = 'display compact row-border', selection = 'single', filter = 'bottom',
+    shiny::validate(need(rv$seq_len, ""))
+    
+    datatable(rv$seq_len[order(-rlen),],
+              rownames = FALSE, class = 'display compact row-border', 
+              selection = 'single', filter = 'bottom', colnames = c("Sequence", "Length"), 
               options = list(
                 pageLength = 15, dom = 'lti', autoWidth = TRUE,
                 lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
@@ -173,8 +180,8 @@ server <- function(input, output, session) {
   # output$lenHist <- renderPlot({
   #   shiny::validate(need(rv$seq_len, ""))
   #   
-  #   ggplot(rv$seq_len, aes(x = rname_len)) + 
-  #     geom_histogram(breaks=seq(1, max(rv$seq_len$rname_len), by = 10000),
+  #   ggplot(rv$seq_len, aes(x = rlen)) + 
+  #     geom_histogram(breaks=seq(1, max(rv$seq_len$rlen), by = 10000),
   #                    fill = "blue", alpha = 0.2)
   # })
   
@@ -198,6 +205,22 @@ server <- function(input, output, session) {
           "}")
       )
     )
+  })
+  
+  
+  
+  ## sequence length histogram
+  output$lenHist <- renderPlot({
+    shiny::validate(need(rv$seq_len, ""))
+    
+    rv$seq_len %>%
+    ggplot(aes(x = rlen))+
+      geom_histogram(bins = 50, 
+                     color = "black", 
+                     fill = "dodgerblue",
+                     alpha = 0.5) +
+      geom_vline(aes(xintercept = mean(rlen)),
+                 color="red",  size=1) 
   })
   
   ##------------------------------------------------------------------------------------------------------------
@@ -247,7 +270,7 @@ server <- function(input, output, session) {
                    detail = 'please wait ...', value = 1,{
                      
                      tgt_contig <- input$seq
-                     tgt_len <- rv$seq_len[rname == tgt_contig, rname_len]
+                     tgt_len <- rv$seq_len[rname == tgt_contig, rlen]
                      subseq_start <- rv$cut_pos + rv$binsize
                      subseq_contig <- paste0(tgt_contig, "_subseq_", subseq_start, ":", tgt_len)
                      
@@ -263,7 +286,7 @@ server <- function(input, output, session) {
                        rbind(., rv$tgt_contig_data)
                      
                      
-                     rv$seq_len <- rv$seq_len[rname == tgt_contig, rname_len := rv$cut_pos] %>%
+                     rv$seq_len <- rv$seq_len[rname == tgt_contig, rlen := rv$cut_pos] %>%
                        rbind(.,list(subseq_contig, tgt_len - rv$cut_pos))
                      
                      updateNumericInput(session, "cutPos", value = 0)
@@ -321,22 +344,22 @@ server <- function(input, output, session) {
                      }
                      
                      rv$interseq_links <-  rv$seq_len[rv$contact_data2[rname != mrnm,], on = c("rname")] %>%
-                       .[rv$seq_len, on = c("mrnm" = "rname"), ':='(mrnm_len = i.rname_len)] %>%
-                       .[((pos < edge_slc | pos > rname_len - edge_slc) & (mpos < edge_slc | mpos > mrnm_len - edge_slc)),] %>%
+                       .[rv$seq_len, on = c("mrnm" = "rname"), ':='(mrnm_len = i.rlen)] %>%
+                       .[((pos < edge_slc | pos > rlen - edge_slc) & (mpos < edge_slc | mpos > mrnm_len - edge_slc)),] %>%
                        .[, ':='(rname_strand = ifelse(pos < edge_slc, "-", 
-                                                      ifelse(pos > rname_len - edge_slc, "+", "M")),
+                                                      ifelse(pos > rlen - edge_slc, "+", "M")),
                                 mrnm_strand = ifelse(mpos < edge_slc, "+", 
                                                      ifelse(mpos > mrnm_len - edge_slc, "-", "M")),
-                                edge_rname = ifelse(rname_len < edge_slc, rname_len, edge_slc),
+                                edge_rname = ifelse(rlen < edge_slc, rlen, edge_slc),
                                 edge_mrnm = ifelse(mrnm_len < edge_slc, mrnm_len, edge_slc))] %>%
-                       .[order(rname_len, decreasing = TRUE), .(link_no = .N, sum = sum(n), 
+                       .[order(rlen, decreasing = TRUE), .(link_no = .N, sum = sum(n), 
                                                                 edge_rname = max(edge_rname), 
                                                                 edge_mrnm = max(edge_mrnm)), 
-                         by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)] %>%
+                         by = .(rname, mrnm, rname_strand, mrnm_strand, rlen, mrnm_len)] %>%
                        .[,.(link_density = round(link_no/(ceiling(edge_rname/rv$binsize) * 
                                                             ceiling(edge_mrnm/rv$binsize)),2), 
                             link_no, sum, avg = sum/link_no), 
-                         by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)]
+                         by = .(rname, mrnm, rname_strand, mrnm_strand, rlen, mrnm_len)]
                      
                      #bin_rname =(link_no/ceiling(min(edge_rname,edge_mrnm)/rv$binsize))/10
                      rv$choices <- unique(rv$interseq_links$rname)
@@ -377,7 +400,7 @@ server <- function(input, output, session) {
                      interseq_links <- fread(file.path(rv$projDir,input$lnkFile)) 
                      
                      # These columns are being used for downstream calculations
-                     required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rname_len", "link_density")
+                     required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rlen", "link_density")
                      
                      if(any(required_cols %!in% names(interseq_links)))
                        stop(paste("Columns", paste0(required_cols, collapse = ", "), 
@@ -694,8 +717,8 @@ server <- function(input, output, session) {
                      rv$seq_len <- rv$seq_len %>%
                        rbind(.,list(new_scaffold, new_contig_len))
                      
-                     rv$choices <- rv$contact_data2[,.(rname, rname_len = max(pos)), 
-                                                 by = .(rname)][order(-rname_len), rname]
+                     rv$choices <- rv$contact_data2[,.(rname, rlen = max(pos)), 
+                                                 by = .(rname)][order(-rlen), rname]
                      choices_style <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
                                                                  border-bottom: 1px solid gray;", length(rv$choices)), 
                                                          "background-color: lightgray;"))
@@ -755,7 +778,7 @@ server <- function(input, output, session) {
       rv$subseq2 <- rv$interseq_links[mrnm %in% leading_seq & 
                                         (!rname %in% leading_seq) & 
                                         link_density <= maxLinkDen & 
-                                        rname_len >= minSeqLen,] %>%
+                                        rlen >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequence = rname, Strand = rname_strand, link_no, link_density)] 
     }
     

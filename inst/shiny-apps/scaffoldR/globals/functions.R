@@ -13,6 +13,20 @@ library(shinydashboard)
 options(future.globals.maxSize = 300*1024^2,
         shiny.maxRequestSize=300*1024^2)
 
+##N50 and N90 calculation
+N50 <- function(x) {
+  contig_no = length(x)
+  assembly_size <- sum(x)
+  n <- NULL
+
+  while ( contig_no < assembly_size) {
+    contigs <- c(contigs, length(x[[cond]])); 
+  cond <- (cond - 1);
+  }
+  N50 <- unlist(tapply(contigs, contigs, function(x) rep(x[1], sum(x))))
+  return(median(N50))
+}
+
 
 join_maps <- function(mat, seq, subseq, binsize, direction = "Forward", output_dir = NULL){
   
