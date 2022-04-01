@@ -202,6 +202,7 @@ shinyUI(
                                  conditionalPanel(
                                    condition = "input.action != 'Join'",
                                    fluidRow(style = "border: 1px solid #E8E8E8; border-radius: 3px; padding: 10px 0 10px 10px; background-color: white; margin: 0;",
+<<<<<<< HEAD
                                             div(style = "float: left; width: calc(100% - 70px); margin-top: -1px;",
                                                 pickerInput("seq", "Sequence:", choices = "", 
                                                             width = '100%', multiple = FALSE,
@@ -230,6 +231,36 @@ shinyUI(
                                                   )
                                               )
                                             )
+=======
+                                       div(style = "float: left; width: calc(100% - 70px); margin-top: -1px;",
+                                       pickerInput("seq", "Sequence:", choices = "", 
+                                                   width = '100%', multiple = FALSE,
+                                                   options = list(style = "btn-default btn-md btn-picker", 
+                                                                  size = 10, `live-search` = TRUE)
+                                                   )
+                                       ),
+                                       div(style = "float: right; width: 65px; margin: 20px 0 0 5px; padding: 1px; height: 33px;",
+                                           actionBttn("down", NULL, icon = icon('arrow-down', lib = "glyphicon"), 
+                                                      style = "material-circle",  size = "xs"),
+                                           actionBttn("up", NULL, icon = icon('arrow-up', lib = "glyphicon"),
+                                                      style = "material-circle", size = "xs")
+                                       ),
+                                       
+                                       conditionalPanel(
+                                         condition = "input.seq.length > 0",
+                                         div(style = "margin-top: -5px;",
+                                             conditionalPanel(
+                                               condition = "input.action == 'Cut'",
+                                               numericInput("cutPos", "Cut position:", value = 0, 
+                                                            min = 0, max = 50000000, step= 100),
+                                               withBusyIndicatorUI(
+                                                 actionButton("cut1", "Cut Sequence", class = "action_button", 
+                                                              icon = icon('scissors', lib = "glyphicon"))
+                                               )
+                                             )
+                                         )
+                                       )
+>>>>>>> ce4d5102cdbde9db9fbd7007c3f99a16515a24c9
                                    )
                                  ),
                                  conditionalPanel(

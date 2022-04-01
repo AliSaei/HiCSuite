@@ -94,8 +94,17 @@ server <- function(input, output, session) {
                          .[ , rlen := ifelse(rlen == 0, binsize_ini, rlen)]
                      }
                      
+<<<<<<< HEAD
                      
                      rv$choices <- rv$seq_len[rname %in% unique(rv$contact_data[, rname]), ][order(-rlen), rname]
+=======
+                     rmax = max(rv$contact_data$pos)
+                     mmax = max(rv$contact_data$mpos)
+                     rv$max = max(rmax, mmax)
+                     binsize_ini <- sort.int(unique(rv$contact_data$pos), partial = 1:2)[1:2]
+                     binsize_ini = as.integer(binsize_ini[2] - binsize_ini[1])
+                     rv$choices <- rv$seq_len[rname %in% unique(rv$contact_data[, rname]), ][order(-rname_len), rname]
+>>>>>>> ce4d5102cdbde9db9fbd7007c3f99a16515a24c9
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
                                                         border-bottom: 1px solid gray;", length(rv$choices)), 
                                                        "background-color: lightgray;"))
@@ -355,11 +364,19 @@ server <- function(input, output, session) {
                        .[order(rlen, decreasing = TRUE), .(link_no = .N, sum = sum(n), 
                                                                 edge_rname = max(edge_rname), 
                                                                 edge_mrnm = max(edge_mrnm)), 
+<<<<<<< HEAD
                          by = .(rname, mrnm, rname_strand, mrnm_strand, rlen, mrnm_len)] %>%
                        .[,.(link_density = round(link_no/(ceiling(edge_rname/rv$binsize) * 
                                                             ceiling(edge_mrnm/rv$binsize)),2), 
                             link_no, sum, avg = sum/link_no), 
                          by = .(rname, mrnm, rname_strand, mrnm_strand, rlen, mrnm_len)]
+=======
+                         by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)] %>%
+                       .[,.(link_density = round(link_no/(ceiling(edge_rname/rv$binsize) * 
+                                                            ceiling(edge_mrnm/rv$binsize)),2), 
+                            link_no, sum, avg = sum/link_no), 
+                         by = .(rname, mrnm, rname_strand, mrnm_strand, rname_len, mrnm_len)]
+>>>>>>> ce4d5102cdbde9db9fbd7007c3f99a16515a24c9
                      
                      #bin_rname =(link_no/ceiling(min(edge_rname,edge_mrnm)/rv$binsize))/10
                      rv$choices <- unique(rv$interseq_links$rname)
@@ -520,7 +537,12 @@ server <- function(input, output, session) {
 
     i <- which(rv$choices == input$seq)
     i = i + 1
+<<<<<<< HEAD
 
+=======
+    print(i)
+    
+>>>>>>> ce4d5102cdbde9db9fbd7007c3f99a16515a24c9
     if(i > length(rv$choices)){
       return(NULL)
     } else {
@@ -534,8 +556,15 @@ server <- function(input, output, session) {
     shiny::validate(need(rv$choices, ""))
     
     i <- which(rv$choices == input$seq)
+<<<<<<< HEAD
     i = i - 1
 
+=======
+    print(i)
+    i = i - 1
+    
+    print(i)
+>>>>>>> ce4d5102cdbde9db9fbd7007c3f99a16515a24c9
     if(i < 1){
       return(NULL)
     } else {
@@ -717,8 +746,13 @@ server <- function(input, output, session) {
                      rv$seq_len <- rv$seq_len %>%
                        rbind(.,list(new_scaffold, new_contig_len))
                      
+<<<<<<< HEAD
                      rv$choices <- rv$contact_data2[,.(rname, rlen = max(pos)), 
                                                  by = .(rname)][order(-rlen), rname]
+=======
+                     rv$choices <- rv$contact_data2[,.(rname, rname_len = max(pos)), 
+                                                 by = .(rname)][order(-rname_len), rname]
+>>>>>>> ce4d5102cdbde9db9fbd7007c3f99a16515a24c9
                      choices_style <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
                                                                  border-bottom: 1px solid gray;", length(rv$choices)), 
                                                          "background-color: lightgray;"))
