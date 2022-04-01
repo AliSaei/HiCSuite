@@ -77,7 +77,7 @@ server <- function(input, output, session) {
                      
                      #names(rv$contact_data) <- c("rname","pos","mrnm","mpos","n")
                      
-                      rmax = max(rv$contact_data$pos)
+                     rmax = max(rv$contact_data$pos)
                      mmax = max(rv$contact_data$mpos)
                      rv$max = max(rmax, mmax)
                      binsize_ini <- sort.int(unique(rv$contact_data$pos), partial = 1:2)[1:2]
