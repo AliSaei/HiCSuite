@@ -110,10 +110,10 @@ shinyUI(
                                  plotOutput("lenHist")
                              ),
                              div(style = "float: left; border-top: 20px solid #ece9df; width: calc(100% - 505px);", 
-                                 div(style = "width: 250px; float: left; background: #ece9df; border: 1px solid #E8E8E8; padding: 5px; margin-top: -5px;",
+                                 div(style = "width: 300px; float: left; background: #ece9df; border: 1px solid #E8E8E8; padding: 5px; margin-top: -5px;",
                                      DT::DTOutput('seqLen')
                                  ),
-                                 div(style = "float: right; background: #ece9df; width: calc(100% - 260px); padding: 5px; margin-top: -1px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;",
+                                 div(style = "float: right; background: #ece9df; width: calc(100% - 310px); padding: 5px; margin-top: -1px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;",
                                      DT::DTOutput('contactData')
                                  )
                              )
@@ -218,11 +218,12 @@ shinyUI(
                                             
                                             conditionalPanel(
                                               condition = "input.seq.length > 0",
-                                              div(style = "margin-top: -5px;",
+                                              div(style = "margin-top: -5px; margin-right: 10px;",
                                                   conditionalPanel(
                                                     condition = "input.action == 'Cut'",
-                                                    numericInput("cutPos", "Cut position:", value = 0, 
+                                                    numericInput("cutPos", "Break position:", value = 0, 
                                                                  min = 0, max = 50000000, step= 100),
+                                                    textInput("frag2Name", "Second fragmnet name:", value = "Default",  width = '100%'),
                                                     withBusyIndicatorUI(
                                                       actionButton("cut1", "Cut Sequence", class = "action_button", 
                                                                    icon = icon('scissors', lib = "glyphicon"))
@@ -235,7 +236,7 @@ shinyUI(
                                  conditionalPanel(
                                    condition = "input.join | input.cut1 | input.cut ",
                                    withBusyIndicatorUI(
-                                     actionButton("svChanges", "Save changes", width = '100%', class = "dbutt", 
+                                     actionButton("svChanges", "Save Changes", width = '100%', class = "dbutt", 
                                                   icon = icon("floppy-disk", lib = "glyphicon")
                                      )
                                    ), 

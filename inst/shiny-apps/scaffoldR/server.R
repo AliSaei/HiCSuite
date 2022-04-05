@@ -90,15 +90,9 @@ server <- function(input, output, session) {
                                            col.names = c("rname","rlen"), 
                                            select = c(1, 2)) 
                      } else {
-                       rv$seq_len <- rv$contact_data[,.(rlen = max(pos)), by = .(rname)] %>%
-                         .[ , rlen := ifelse(rlen == 0, binsize_ini, rlen)]
+                       rv$seq_len <- rv$contact_data[,.(rlen = max(pos)), by = .(rname)]
                      }
                      
-                     
-                     rv$choices <- rv$seq_len[rname %in% unique(rv$contact_data[, rname]), ][order(-rlen), rname]
-                     choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
-                                                        border-bottom: 1px solid gray;", length(rv$choices)), 
-                                                       "background-color: lightgray;"))
                      
                      updateNumericInput(session, "binsize2", value = binsize_ini, 
                                         min = binsize_ini,  
@@ -111,6 +105,12 @@ server <- function(input, output, session) {
                      updateNumericInput(session, "edgeSize3",  value = 20 * binsize_ini, 
                                         min = binsize_ini, 
                                         step = binsize_ini , max = 500000)
+                     ##---------------------------------------------------------
+                     #[rname %in% unique(rv$contact_data[, rname]), ]
+                     rv$choices <- rv$seq_len[order(-rlen), rname]
+                     choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
+                                                        border-bottom: 1px solid gray;", length(rv$choices)), 
+                                                       "background-color: lightgray;"))
                      
                      updatePickerInput(session, "seq", choices = rv$choices, 
                                        choicesOpt = choices_opt)
@@ -134,7 +134,7 @@ server <- function(input, output, session) {
   
   ##------------------------------------------------------------------------------------------------------------
   ##------------------------------------------------------------------------------------------------------------
-  # udpate bin size
+  # change bin size
   observeEvent(input$update_bin, {
     withBusyIndicatorServer("update_bin", {
       withProgress(message = 'Binning in progress',
@@ -214,7 +214,7 @@ server <- function(input, output, session) {
     shiny::validate(need(rv$seq_len, ""))
     
     rv$seq_len %>%
-    ggplot(aes(x = rlen))+
+      ggplot(aes(x = rlen))+
       geom_histogram(bins = 50, 
                      color = "black", 
                      fill = "dodgerblue",
@@ -271,34 +271,44 @@ server <- function(input, output, session) {
                      
                      tgt_contig <- input$seq
                      tgt_len <- rv$seq_len[rname == tgt_contig, rlen]
-                     subseq_start <- rv$cut_pos + rv$binsize
-                     subseq_contig <- paste0(tgt_contig, "_subseq_", subseq_start, ":", tgt_len)
+                     frag_start <- rv$cut_pos + rv$binsize
+                     
+                     if(input$frag2Name == "Default"){
+                       frag2_name <- paste0(tgt_contig, "_fragment_", frag_start, ":", tgt_len)
+                     } else {
+                       frag2_name <- input$frag2Name
+                     }
+                     
                      
                      rv$tgt_contig_data <- rv$contact_data2 %>%
                        .[(rname == tgt_contig | mrnm == tgt_contig),] %>%
-                       .[,':='(rname = ifelse(rname == tgt_contig & pos >  rv$cut_pos , subseq_contig, rname),
-                               mrnm = ifelse(mrnm == tgt_contig & mpos >  rv$cut_pos , subseq_contig, mrnm))] %>%
-                       .[, ':='(pos = ifelse(rname == subseq_contig,  pos - subseq_start, pos ),
-                                mpos = ifelse(mrnm == subseq_contig , mpos - subseq_start , mpos))]
+                       .[,':='(rname = ifelse(rname == tgt_contig & pos >  rv$cut_pos , frag2_name, rname),
+                               mrnm = ifelse(mrnm == tgt_contig & mpos >  rv$cut_pos , frag2_name, mrnm))] %>%
+                       .[, ':='(pos = ifelse(rname == frag2_name,  pos - frag_start, pos ),
+                                mpos = ifelse(mrnm == frag2_name , mpos - frag_start , mpos))]
                      
                      rv$contact_data2 <- rv$contact_data2 %>%
                        .[(rname != tgt_contig & mrnm != tgt_contig),] %>%
                        rbind(., rv$tgt_contig_data)
                      
+                     ## Update sequence length
+                     rv$seq_len <- rv$contact_data2[,.(rlen = max(pos)), by = .(rname)] %>%
+                       .[order(-rlen),]
                      
-                     rv$seq_len <- rv$seq_len[rname == tgt_contig, rlen := rv$cut_pos] %>%
-                       rbind(.,list(subseq_contig, tgt_len - rv$cut_pos))
+                     #rv$seq_len <- rv$seq_len[rname == tgt_contig, rlen := rv$cut_pos] %>%
+                     #  rbind(.,list(frag2_name, tgt_len - rv$cut_pos)) %>%
+                     #  .[order(-rlen),]
                      
-                     updateNumericInput(session, "cutPos", value = 0)
-                     
-                     rv$choices <- unique(rv$contact_data2[["rname"]])
+                     rv$choices <- rv$seq_len[["rname"]]
                      updatePickerInput(session, "seq", choices = rv$choices, selected = tgt_contig,
                                        choicesOpt = list(style = paste(
                                          rep_len("font-size: 12px; line-height: 1.5; 
                                        margin-left: -10px; border-bottom: 1px solid gray;", 
                                                  length(rv$choices)), "background-color: lightgray;")))
-                     #set plot size to default
+                     ## Set plot size to default
                      rv$intramap_range <- NULL
+                     ## Set break position to 0
+                     updateNumericInput(session, "cutPos", value = 0)
                    })
     })
   })
@@ -327,7 +337,7 @@ server <- function(input, output, session) {
     
     withBusyIndicatorServer(btn_id[i], {
       withProgress(message = 'Calculating links number',
-                   detail = 'please wait ...', value = 1,{
+                   detail = 'please wait ...', value = 1, {
                      
                      if(btn_id[i] == "calcIntraction1"){
                        shinyjs::hide("IntConfig2")
@@ -353,8 +363,8 @@ server <- function(input, output, session) {
                                 edge_rname = ifelse(rlen < edge_slc, rlen, edge_slc),
                                 edge_mrnm = ifelse(mrnm_len < edge_slc, mrnm_len, edge_slc))] %>%
                        .[order(rlen, decreasing = TRUE), .(link_no = .N, sum = sum(n), 
-                                                                edge_rname = max(edge_rname), 
-                                                                edge_mrnm = max(edge_mrnm)), 
+                                                           edge_rname = max(edge_rname), 
+                                                           edge_mrnm = max(edge_mrnm)), 
                          by = .(rname, mrnm, rname_strand, mrnm_strand, rlen, mrnm_len)] %>%
                        .[,.(link_density = round(link_no/(ceiling(edge_rname/rv$binsize) * 
                                                             ceiling(edge_mrnm/rv$binsize)),2), 
@@ -517,10 +527,10 @@ server <- function(input, output, session) {
   # move up and down the options list ---------------
   observeEvent(input$down,{
     shiny::validate(need(rv$choices, ""))
-
+    
     i <- which(rv$choices == input$seq)
     i = i + 1
-
+    
     if(i > length(rv$choices)){
       return(NULL)
     } else {
@@ -535,7 +545,7 @@ server <- function(input, output, session) {
     
     i <- which(rv$choices == input$seq)
     i = i - 1
-
+    
     if(i < 1){
       return(NULL)
     } else {
@@ -564,29 +574,32 @@ server <- function(input, output, session) {
     input$cut1
     input$cut2
     
-    p <- rv$contact_data2[rname == input$seq & mrnm == input$seq, ]
-    
-    if(nrow(p) == 0) 
-      return(NULL)
-    
-    p <- p %>% ggplot(aes(x = pos, y = mpos, fill=log10(n/2))) +
-      geom_tile(color = "red", size = 0.1) +
-      scale_fill_gradient(low = "#ffe6e6", high = "red") +
-      scale_x_continuous(expand=c(0,0)) +
-      scale_y_continuous(expand=c(0,0)) +
-      labs(title = input$seq , subtitle = paste0("Size: ", 
-                                                 max(p$pos/1000000), " Mb"), x = "", y = "") +
-      #coord_cartesian(ylim=c(-12,12)) +
-      theme(axis.text = element_blank(),
-            axis.ticks = element_blank(), 
-            legend.position = "none",
-            panel.border = element_rect(colour = "gray", fill = NA),
-            panel.background = element_rect(fill = "white", colour = "white"))
-    
-    updateNumericInput(session, "cutPos", value = 0)
-    # rv$cut_pos <- 0
-    rv$intramap_range <- NULL
-    rv$intramap_plot <- p
+    withProgress(message = 'Preparing plot',
+                 detail = 'please wait ...', value = 1,{
+                   p <- rv$contact_data2[rname == input$seq & mrnm == input$seq, ]
+                   
+                   if(nrow(p) == 0) 
+                     return(NULL)
+                   
+                   p <- p %>% ggplot(aes(x = pos, y = mpos, fill=log10(n/2))) +
+                     geom_tile(color = "red", size = 0.1) +
+                     scale_fill_gradient(low = "#ffe6e6", high = "red") +
+                     scale_x_continuous(expand=c(0,0)) +
+                     scale_y_continuous(expand=c(0,0)) +
+                     labs(title = input$seq , subtitle = paste0("Size: ", 
+                                                                max(p$pos/1000000), " Mb"), x = "", y = "") +
+                     #coord_cartesian(ylim=c(-12,12)) +
+                     theme(axis.text = element_blank(),
+                           axis.ticks = element_blank(), 
+                           legend.position = "none",
+                           panel.border = element_rect(colour = "gray", fill = NA),
+                           panel.background = element_rect(fill = "white", colour = "white"))
+                   
+                   #updateNumericInput(session, "cutPos", value = 0)
+                   # rv$cut_pos <- 0
+                   rv$intramap_range <- NULL
+                   rv$intramap_plot <- p
+                 })
     
   })
   
@@ -598,7 +611,7 @@ server <- function(input, output, session) {
         coord_cartesian(ylim = rv$intramap_range, 
                         xlim = rv$intramap_range) 
       
-      session$resetBrush("intramap_brush")
+    session$resetBrush("intramap_brush")
     } else {
       p <- rv$intramap_plot 
     }
@@ -714,14 +727,21 @@ server <- function(input, output, session) {
                        .[,':='(rname = ifelse(rname %in% c(tgt_contig, subseq_contig), new_scaffold, rname),
                                mrnm = ifelse(mrnm %in% c(tgt_contig, subseq_contig), new_scaffold, mrnm))]
                      
-                     rv$seq_len <- rv$seq_len %>%
-                       rbind(.,list(new_scaffold, new_contig_len))
+                     #rv$seq_len <- rv$seq_len %>%
+                     #  rbind(.,list(new_scaffold, new_contig_len))
+                     
+                     rv$seq_len <- rv$contact_data2[,.(rlen = max(pos)), by = .(rname)] %>%
+                       .[order(-rlen),]
                      
                      rv$choices <- rv$contact_data2[,.(rname, rlen = max(pos)), 
-                                                 by = .(rname)][order(-rlen), rname]
-                     choices_style <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
-                                                                 border-bottom: 1px solid gray;", length(rv$choices)), 
-                                                         "background-color: lightgray;"))
+                                                    by = .(rname)][order(-rlen), rname]
+                     choices_style <- list(style = 
+                                             paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
+                                                                 border-bottom: 1px solid gray;", 
+                                                           length(rv$choices)
+                                             ), 
+                                             "background-color: lightgray;")
+                                           )
                      
                      updatePickerInput(session, "seq", choices = rv$choices, 
                                        selected = new_scaffold,
@@ -740,8 +760,11 @@ server <- function(input, output, session) {
   ###--------save changes----------- 
   observeEvent(input$svChanges, {
     withBusyIndicatorServer("svChanges", {
+      base_name <- sub("\\d+-\\d+-\\d+-(\\w+)\\..*", "\\1",input$mapFile, 
+                       ignore.case = TRUE)
+      
       saveRDS(rv$contact_data2, 
-              file.path(rv$projDir, paste0(Sys.Date(), "_", input$mapFile, ".rds"))
+              file.path(rv$projDir, paste0(Sys.Date(), "_", base_name, ".rds"))
       )
     })
   })
