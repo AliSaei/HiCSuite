@@ -77,9 +77,6 @@ server <- function(input, output, session) {
                      
                      #names(rv$contact_data) <- c("rname","pos","mrnm","mpos","n")
                      
-                     rmax = max(rv$contact_data$pos)
-                     mmax = max(rv$contact_data$mpos)
-                     rv$max = max(rmax, mmax)
                      binsize_ini <- sort.int(unique(rv$contact_data$pos), partial = 1:2)[1:2]
                      binsize_ini = as.integer(binsize_ini[2] - binsize_ini[1])
                      
@@ -140,6 +137,10 @@ server <- function(input, output, session) {
       withProgress(message = 'Binning in progress',
                    detail = 'please wait ...', value = 1, {
                      rv$binsize <- input$binsize
+                     
+                     rmax <- max(rv$contact_data$pos)
+                     mmax <- max(rv$contact_data$mpos)
+                     rv$max <- max(rmax, mmax)
                      
                      if(rv$binsize_ini != rv$binsize){
                        bins =  seq(rv$binsize , rv$max, rv$binsize)
@@ -225,7 +226,7 @@ server <- function(input, output, session) {
   
   ##------------------------------------------------------------------------------------------------------------
   ##------------------------------------------------------------------------------------------------------------  
-  # click events on intra-map view
+  # capture click events on intra-map view
   observe({
     shiny::validate(need(rv$contact_data2, ""))
     if(is.null(input$intramap_dblclick)) 
@@ -241,7 +242,7 @@ server <- function(input, output, session) {
   })
   
   ##----------------------------------------------------------------------------
-  # brush event
+  # capture brush event
   observe({
     shiny::validate(need(rv$binsize > 0, ""))
     
@@ -293,7 +294,7 @@ server <- function(input, output, session) {
                      
                      ## Update sequence length
                      rv$seq_len <- rv$contact_data2[,.(rlen = max(pos)), by = .(rname)] %>%
-                       .[order(-rlen),]
+                       .[order(rname),]
                      
                      #rv$seq_len <- rv$seq_len[rname == tgt_contig, rlen := rv$cut_pos] %>%
                      #  rbind(.,list(frag2_name, tgt_len - rv$cut_pos)) %>%
@@ -760,7 +761,7 @@ server <- function(input, output, session) {
   ###--------save changes----------- 
   observeEvent(input$svChanges, {
     withBusyIndicatorServer("svChanges", {
-      base_name <- sub("\\d+-\\d+-\\d+-(\\w+)\\..*", "\\1",input$mapFile, 
+      base_name <- sub("\\d+-\\d+-\\d+_(\\w+).rds|.bin|.txt*", "\\1",input$mapFile, 
                        ignore.case = TRUE)
       
       saveRDS(rv$contact_data2, 
@@ -830,8 +831,9 @@ server <- function(input, output, session) {
               rownames = FALSE, class = 'display compact row-border', 
               selection = 'single', filter = 'bottom',
               options = list(
-                pageLength = 5, dom = 'lti', autoWidth = TRUE,
+                pageLength = 5, dom = 'lti', 
                 lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+                ScrollY = "500px",
                 scrollX = TRUE,
                 initComplete = JS(
                   "function(settings, json) {",
