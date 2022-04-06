@@ -777,7 +777,7 @@ server <- function(input, output, session) {
     shiny::validate(need(rv$interseq_links, ""))
     shiny::validate(need(input$nrSeq, ""))
     
-    len <- length(isolate(input$chained_seq))
+    len <- length(isolate(input$joined_seqs))
     seq2 <- input$seq2
     leading_seq <- seq2[length(seq2)]
     leadingSeq_len <-  max(rv$contact_data2[rname == leading_seq, pos])
@@ -813,7 +813,7 @@ server <- function(input, output, session) {
   observe({
     shiny::validate(need(rv$subseq2, ""))
     
-    chr <- gsub("^[-+]", "", c(input$chained_seq, input$scaf_man))
+    chr <- gsub("^[-+]", "", c(input$joined_seqs, input$scaf_man))
     rv$subseq2.1 <- rv$subseq2[(!(Subsequent_seq %in% chr)), ]
     rv$choices2 <- c(unique(rv$subseq2.1$Subsequent_seq), chr)
     
@@ -821,7 +821,7 @@ server <- function(input, output, session) {
                       choicesOpt = list(
                         style = paste(
                           rep_len("font-size: 12px; line-height: 1.5; 
-                                                              margin-left: -10px; border-bottom: 1px solid gray;", 
+                                  margin-left: -10px; border-bottom: 1px solid gray;", 
                                   length(rv$choices2)), "background-color: lightgray;")))
     shinyWidgets::updateSwitchInput(session, "strand_3", value = rv$subseq2.1$Strand[1] == "+")
   })
@@ -883,7 +883,7 @@ server <- function(input, output, session) {
       strand_2 <- ifelse(input$strand_2, "+", "-")
       strand_3 <- ifelse(input$strand_3, "+", "-")
       rv$s2.1 <- paste0(strand_3, input$subseq2)
-      chr <- isolate(input$chained_seq)
+      chr <- isolate(input$joined_seqs)
       direction <- isolate(input$dir2)
       
       if(input$nrSeq == 1 | is.null(chr)){
@@ -1021,7 +1021,7 @@ server <- function(input, output, session) {
       
       direction <- input$dir2
       
-      if(length(input$chained_seq) == 0){
+      if(length(input$joined_seqs) == 0){
         if (direction == 'Backward'){
           rv$chr <- c( rv$s2.1, rv$s1)
         } else {
@@ -1029,12 +1029,12 @@ server <- function(input, output, session) {
         }
       } else {
         if (direction == 'Backward'){
-          rv$chr <- c(rv$s2.1, input$chained_seq)
+          rv$chr <- c(rv$s2.1, input$joined_seqs)
         } else {
-          rv$chr <-  c(input$chained_seq, rv$s2.1)
+          rv$chr <-  c(input$joined_seqs, rv$s2.1)
         }
       }
-      updateCheckboxGroupInput(session, "chained_seq", NULL, 
+      updateCheckboxGroupInput(session, "joined_seqs", NULL, 
                                choices = unique(rv$chr), selected = unique(rv$chr))
       updateTextAreaInput(session, "scaf_edit", NULL, 
                           value = paste(unique(rv$chr), collapse = "\n"))
@@ -1042,12 +1042,12 @@ server <- function(input, output, session) {
   })
   
   ## copy to clipboard
-  observeEvent(input$clipbtn, clipr::write_clip(input$chained_seq, allow_non_interactive = TRUE))
+  observeEvent(input$clipbtn, clipr::write_clip(input$joined_seqs, allow_non_interactive = TRUE))
   
   ## erase the list 
   observeEvent(input$erase,{ 
-    choices =  input$chained_seq
-    updateCheckboxGroupInput(session, "chained_seq", NULL, choices =  choices[1], selected =  choices[1])
+    choices =  input$joined_seqs
+    updateCheckboxGroupInput(session, "joined_seqs", NULL, choices =  choices[1], selected =  choices[1])
   })
   
   ## edit the list 
@@ -1061,7 +1061,7 @@ server <- function(input, output, session) {
   observeEvent(input$check,{ 
     
     choices = base::strsplit(input$scaf_edit, "\n")[[1]]
-    updateCheckboxGroupInput(session, "chained_seq", NULL, choices =  choices, selected =  choices)
+    updateCheckboxGroupInput(session, "joined_seqs", NULL, choices =  choices, selected =  choices)
     
     shinyjs::hide("EditBox")
     shinyjs::show("CheckBox")
@@ -1071,12 +1071,12 @@ server <- function(input, output, session) {
   
   
   observeEvent(input$export,{
-    shiny::validate(need(input$chained_seq, ""))
+    shiny::validate(need(input$joined_seqs, ""))
     
     out_dir <- file.path(rv$projDir,"groups")
     dir.create(out_dir, showWarnings = FALSE)
     
-    super_seq <- data.table(name = input$chained_seq) %>%
+    super_seq <- data.table(name = input$joined_seqs) %>%
       .[, ':='(name = substr(name, 2, nchar(name)),
                rc=ifelse(grepl("\\+", name), 0, 1),
                q = ".", 
@@ -1090,7 +1090,7 @@ server <- function(input, output, session) {
   })
   
   observe({
-    chr <- input$chained_seq
+    chr <- input$joined_seqs
     
     if(length(chr) > 1){
       disable("seq2"); disable_switch = TRUE;
@@ -1115,8 +1115,8 @@ server <- function(input, output, session) {
     withBusyIndicatorServer("combineMaps",{
       withProgress(message = 'Preparing contact data', value = 1, 
                    detail = "please be patient ...", {
-                     #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$chained_seq}
-                     maps <- input$chained_seq
+                     #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$joined_seqs}
+                     maps <- input$joined_seqs
                      
                      rv$combined_maps <- join_maps_plus(mat = rv$contact_data2, 
                                                         seq = maps, direction = "Forward", 
