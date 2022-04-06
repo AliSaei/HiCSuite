@@ -82,7 +82,7 @@ shinyUI(
                              div(id = "DtBin" , style = "padding: 10px;",
                                  
                                  fluidRow(style = "margin: 0px;",
-                                          numericInput("binsize2", "Bin Size:", value = 1, min = 0, max = 500000, step= 10000),
+                                          numericInput("binsize2", "Bin Size (bp):", value = 1, min = 0, max = 500000, step= 10000),
                                           div(style = "margin-top: -13px;",
                                               sliderInput("binsize", NULL, min = 0, value = 0, max = 0, width = '100%', ticks = TRUE)
                                           ),
@@ -236,7 +236,7 @@ shinyUI(
                                  conditionalPanel(
                                    condition = "input.join | input.cut1 | input.cut ",
                                    withBusyIndicatorUI(
-                                     actionButton("svChanges", "Save Changes", width = '100%', class = "dbutt", 
+                                     actionButton("svChanges", "Save changes to disk", width = '100%', class = "dbutt", 
                                                   icon = icon("floppy-disk", lib = "glyphicon")
                                      )
                                    ), 

@@ -19,7 +19,7 @@ shinyUI(
                                  conditionalPanel(
                                    condition = "input.lnkDataSrc == 'Calculate'",
                                    fluidRow(style = "margin: -12px 0 0 0; border-top: 1px solid #E8E8E8; padding-top: 5px;",
-                                            numericInput("edgeSize3", "Edge Size:", value = 1, 
+                                            numericInput("edgeSize3", "Edge Size (bp):", value = 1, 
                                                          min = 0, max = 500000, step= 10000),
                                             div(style = "margin-top: -13px;",
                                                 sliderInput("edgeSize4", NULL, value = 0,
@@ -58,7 +58,7 @@ shinyUI(
                                      htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                          ),
                          div(style = "border: 1px solid #E8E8E8; border-radius: 5px; padding: 2px;  background-color: white; margin-top: 0px; ",
-                             div(style = "padding: 5px;",
+                             div(id = "ScafConfig", style = "padding: 5px;",
                                  div(
                                      fluidRow(style = "margin: 0px;",
                                               radioGroupButtons("dir2", "Leading sequence:", size = "xs",
@@ -156,7 +156,7 @@ shinyUI(
                                                   
                                                   div(style = "width: calc(100% - 35px); float: left; padding: 2px;",
                                                       div(id = "CheckBox", style = "border: 1px solid #F4F4F4; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: #E8E8E8; margin-right: 2px;",
-                                                          checkboxGroupInput("chained_seq", "Scaffold:", choices = NULL)
+                                                          checkboxGroupInput("joined_seqs", "Scaffold:", choices = NULL)
                                                       ),
                                                       hidden(
                                                         div(id = "EditBox" , style = "margin-top: 0px;",
@@ -185,7 +185,7 @@ shinyUI(
                              div(style = "margin-left: 5px; float: left; width: calc(100% - 320px);",  
                                  div(style = "border-left: 1px solid #E8E8E8;",
                                  div(
-                                   actionButton("vwJointMap", "Scaffolding Map",icon = icon("graph"), width = "200px"),
+                                   actionButton("vwJointMap", "Scaffolding Map",icon = icon("table"), width = "200px"),
                                    tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
                                  ),
@@ -221,7 +221,7 @@ shinyUI(
                                               
                                           ),
                                           fluidRow(style = "float: right; width: calc(100% - 85vh); padding: 5px; border: 1px solid #E8E8E8; border-radius: 3px; margin: 1px;",
-                                                DTOutput("Subseq") 
+                                                DTOutput("Subseq2") 
                                           )
                                  ),
                                  div(

@@ -466,13 +466,13 @@ server <- function(input, output, session) {
     
     if(input$dir1 == "Backward"){
       subseq1 <- rv$interseq_links[mrnm %in% seq & (!rname %in% seq),] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequence = rname, Strand = rname_strand)] 
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequent_seq = rname, Strand = rname_strand)] 
     } else {
       subseq1 <- rv$interseq_links[rname %in% seq & (!mrnm %in% seq),] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequence = mrnm, Strand = mrnm_strand)]
+        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequent_seq = mrnm, Strand = mrnm_strand)]
     }
     
-    choices <- unique(subseq1$Subsequence)
+    choices <- unique(subseq1$Subsequent_seq)
     updatePickerInput(session, "subseq1", choices = choices,
                       choicesOpt = list(style = paste(
                         rep_len("font-size: 12px; line-height: 1.5; 
@@ -797,13 +797,15 @@ server <- function(input, output, session) {
       rv$subseq2 <- rv$interseq_links[rname %in% leading_seq & 
                                         (!mrnm %in% leading_seq) & 
                                         link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequence = mrnm, Strand = mrnm_strand, link_no, link_density)]
+        .[order(link_density, link_no, avg, decreasing = TRUE), 
+          .(Subsequent_seq = mrnm, Length = mrnm_len, Strand = mrnm_strand, link_no, link_density)]
     } else {
       rv$subseq2 <- rv$interseq_links[mrnm %in% leading_seq & 
                                         (!rname %in% leading_seq) & 
                                         link_density <= maxLinkDen & 
                                         rlen >= minSeqLen,] %>%
-        .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequence = rname, Strand = rname_strand, link_no, link_density)] 
+        .[order(link_density, link_no, avg, decreasing = TRUE), 
+          .(Subsequent_seq = rname, Length = mrnm_len, Strand = rname_strand, link_no, link_density)] 
     }
     
   })
@@ -812,8 +814,8 @@ server <- function(input, output, session) {
     shiny::validate(need(rv$subseq2, ""))
     
     chr <- gsub("^[-+]", "", c(input$chained_seq, input$scaf_man))
-    rv$subseq2.1 <- rv$subseq2[(!(Subsequence %in% chr)), ]
-    rv$choices2 <- c(unique(rv$subseq2.1$Subsequence), chr)
+    rv$subseq2.1 <- rv$subseq2[(!(Subsequent_seq %in% chr)), ]
+    rv$choices2 <- c(unique(rv$subseq2.1$Subsequent_seq), chr)
     
     updatePickerInput(session, "subseq2", choices =  rv$choices2,
                       choicesOpt = list(
@@ -831,7 +833,7 @@ server <- function(input, output, session) {
               rownames = FALSE, class = 'display compact row-border', 
               selection = 'single', filter = 'bottom',
               options = list(
-                pageLength = 5, dom = 'lti', 
+                pageLength = 15, dom = 'lti', 
                 lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
                 ScrollY = "500px",
                 scrollX = TRUE,
@@ -854,7 +856,7 @@ server <- function(input, output, session) {
     
     if(i > length(rv$choices2)) return(NULL)
     s2 <- rv$choices2[i]
-    strand_3 <- rv$subseq2.1[Subsequence ==  s2, Strand][1]
+    strand_3 <- rv$subseq2.1[Subsequent_seq ==  s2, Strand][1]
     
     updatePickerInput(session, "subseq2",  selected = rv$choices2[i])
     shinyWidgets::updateSwitchInput(session, "strand_3", value = strand_3 == "+")
@@ -866,7 +868,7 @@ server <- function(input, output, session) {
     
     if(i < 1) return(NULL)
     s2 <- rv$choices2[i]
-    strand_3 <- rv$subseq2.1[Subsequence ==  s2, Strand][1]
+    strand_3 <- rv$subseq2.1[Subsequent_seq ==  s2, Strand][1]
     updatePickerInput(session, "subseq2",  selected = rv$choices2[i])
     shinyWidgets::updateSwitchInput(session, "strand_3", value = strand_3 == "+")
   })

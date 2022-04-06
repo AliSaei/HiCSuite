@@ -57,6 +57,10 @@ $('#intConfig2').click(function(){
   $('#IntConfig2').slideToggle();
 });
 
+$('#scafConfig').click(function(){
+  $('#ScafConfig').slideToggle();
+});
+
   // reset the app when the button pressed
   $('#reset').click(function(){
   history.go(0);
