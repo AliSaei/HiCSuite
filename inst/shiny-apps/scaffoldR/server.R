@@ -828,7 +828,7 @@ server <- function(input, output, session) {
   
   ##----------------------------------------------------------------------------
   ##----------------------------------------------------------------------------
-  output$Subseq <- DT::renderDT({
+  output$Subsequent <- DT::renderDT({
     datatable(rv$subseq2,
               rownames = FALSE, class = 'display compact row-border', 
               selection = 'single', filter = 'bottom',

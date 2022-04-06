@@ -221,7 +221,7 @@ shinyUI(
                                               
                                           ),
                                           fluidRow(style = "float: right; width: calc(100% - 85vh); padding: 5px; border: 1px solid #E8E8E8; border-radius: 3px; margin: 1px;",
-                                                DTOutput("Subseq2") 
+                                                DTOutput("Subsequent") 
                                           )
                                  ),
                                  div(
