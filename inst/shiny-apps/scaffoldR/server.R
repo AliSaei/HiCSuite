@@ -437,7 +437,8 @@ server <- function(input, output, session) {
                        interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile))
                      }
                      
-              
+                     interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile)) 
+                     
                      # These columns are being used for downstream calculations
                      required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rlen", "link_density")
                      
@@ -489,7 +490,7 @@ server <- function(input, output, session) {
     withBusyIndicatorServer("svInteractionCounts", {
       file_name <- paste(Sys.Date(), '-interseq_link_counts-',rv$edge_slc, '.rds', sep='')
       
-      saveRDS(rv$contact_data2, 
+      saveRDS(rv$interseq_link_counts, 
               file.path(rv$projDir, file_name)
       )
     })
