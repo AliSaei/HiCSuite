@@ -57,7 +57,7 @@ shinyUI(
       # Also add some custom CSS to make the title background area the same
       # color as the rest of the header.
       tags$head(tags$style(HTML("
-                           .action_button{font-size: 12px; font-family: Tahoma; width: 100%; font-weight: 550; background-color: green; color: white;}
+                           .btn-action{font-size: 12px; font-family: Tahoma; width: 100%; font-weight: 550; background-color: green; color: white;}
                            .btn-update{font-size: 12px; font-family:Tahoma; width: 100%; font-weight: 550; background-color: #ece9df;}
                            .btn-dir{font-size: 12px; font-family:Tahoma; width: 100%; background-color: #F8F8F8;}
                            .btn-picker{font-size: 12px; font-family:Tahoma; background-color: #F8F8F8;}

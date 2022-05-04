@@ -7,13 +7,37 @@ window.onbeforeunload = function(e) {
   return '';
 }; 
 
+// show/hide plots and table  
+$('#dtInput').click(function(){
+  $('#DataInput').slideToggle();
+});
+
+ 
+$('#dtBin').click(function(){
+  $('#DtBin').slideToggle();
+});
+
+$('#faInput').click(function(){
+  $('#FAInput').slideToggle();
+});
+
 $('#vwData').click(function(){
   $('#DataView').slideToggle();
 });
+
+$('#vwData1').click(function(){
+  $('#DataView1').slideToggle();
+});
+
+$('#vwStats').click(function(){
+  $('#VwLnkData').slideUp();
+  $('#VwStats').slideToggle();
+});
+
+$('#vwLnkData').click(function(){
+   $('#VwStats').slideUp();
+  $('#VwLnkData').slideToggle();
   
-// show/hide plots and table  
-$('#dtBin').click(function(){
-  $('#DtBin').slideToggle();
 });
 
 $('#intConfig1').click(function(){
@@ -70,9 +94,12 @@ $('#scafConfig').click(function(){
 // tooltips
 $("#dir1").attr('title', 'Scaffolding direction');
 $("#mapSrc").attr('title', 'Data source');
-$("#exitZoom").attr('title', 'Exit zoom');
-$("#clearBrush").attr('title', 'Clear cut line');
-$("#cut2").attr('title', 'Cut sequence');
+$("#exitZoom1").attr('title', 'Exit zoom');
+$("#exitZoom2").attr('title', 'Exit zoom');
+$("#clearBrush1").attr('title', 'Clear break line');
+$("#clearBrush2").attr('title', 'Clear break line');
+$("#cut1").attr('title', 'Break sequence');
+$("#cut2").attr('title', 'Break sequence');
 $("#svChanges").attr('title', 'Save change to the set data directory');
 $("#export").attr('title', 'Save to data directory');
 $("#edit").attr('title', 'Edit');

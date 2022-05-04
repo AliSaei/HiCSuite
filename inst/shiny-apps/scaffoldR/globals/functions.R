@@ -9,6 +9,7 @@ library(shinyFiles)
 library(DT)
 library(clipr)
 library(shinydashboard)
+library(Biostrings)
 
 options(future.globals.maxSize = 300*1024^2,
         shiny.maxRequestSize=300*1024^2)

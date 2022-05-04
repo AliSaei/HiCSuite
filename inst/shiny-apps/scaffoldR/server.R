@@ -38,8 +38,11 @@ server <- function(input, output, session) {
     
     rds_list <- list.files(rv$projDir, pattern = ".rds$|.bin|.txt", 
                            recursive = TRUE, ignore.case = TRUE)
-    txt_list <- list.files(rv$projDir, pattern = ".csv$|.txt$", 
+    txt_list <- list.files(rv$projDir, pattern = ".csv$|.txt$|.tab$", 
                            recursive = TRUE, ignore.case = TRUE)
+    fa_list <- list.files(rv$projDir, pattern = ".fa$|.fasta$", 
+                           recursive = TRUE, ignore.case = TRUE)
+    
     
     updatePickerInput(session, "mapFile", choices = rds_list,                           
                       choicesOpt = list(style = paste(
@@ -51,6 +54,13 @@ server <- function(input, output, session) {
                         rep_len("font-size: 12px; line-height: 1.5; 
                       margin-left: -10px; border-bottom: 1px solid gray;", 
                                 length(txt_list)), "background-color: lightgray;")))
+    
+    updatePickerInput(session, "faFile", choices = fa_list,                           
+                      choicesOpt = list(style = paste(
+                        rep_len("font-size: 12px; line-height: 1.5; 
+                      margin-left: -10px; border-bottom: 1px solid gray;", 
+                                length(fa_list)), "background-color: lightgray;")))
+    
     updatePickerInput(session, "lnkFile", choices = txt_list,                           
                       choicesOpt = list(style = paste(
                         rep_len("font-size: 12px; line-height: 1.5; 
@@ -80,14 +90,14 @@ server <- function(input, output, session) {
                      binsize_ini <- sort.int(unique(rv$contact_data$pos), partial = 1:2)[1:2]
                      binsize_ini = as.integer(binsize_ini[2] - binsize_ini[1])
                      
-                     
                      ## calculate or import length of sequences
                      if(input$loadSeqLen){
                        rv$seq_len <- fread(file.path(rv$projDir,input$lenFile), 
                                            col.names = c("rname","rlen"), 
-                                           select = c(1, 2)) 
+                                           select = c(1, 2)) %>%
+                         .[order(-rlen),]
                      } else {
-                       rv$seq_len <- rv$contact_data[,.(rlen = max(pos)), by = .(rname)]
+                       rv$seq_len <- rv$contact_data[,.(rlen = max(pos)), by = .(rname)][order(-rlen),]
                      }
                      
                      
@@ -104,7 +114,7 @@ server <- function(input, output, session) {
                                         step = binsize_ini , max = 500000)
                      ##---------------------------------------------------------
                      #[rname %in% unique(rv$contact_data[, rname]), ]
-                     rv$choices <- rv$seq_len[order(-rlen), rname]
+                     rv$choices <- rv$seq_len[, rname]
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
                                                         border-bottom: 1px solid gray;", length(rv$choices)), 
                                                        "background-color: lightgray;"))
@@ -124,14 +134,27 @@ server <- function(input, output, session) {
     })
   })
   
+  ## Import assembled scaffolds 
+  observeEvent(input$import_fasta,{
+    withBusyIndicatorServer("import_fasta", {
+      withProgress(message = 'Loading in progress',
+                   detail = 'Please wait...', value = 1,{
+                     
+                     rv$fasta <-  readDNAStringSet(file.path(rv$projDir, input$faFile))
+                   })
+    })
+  })
+  
+
+  
+  ##----------------------------------------------------------------------------
+  ##----------------------------------------------------------------------------
+  # Bin Size
   observe({
     updateSliderInput(session, "binsize", value = input$binsize2, 
                       step = rv$binsize_ini , max = input$binsize2)
   })
   
-  ##------------------------------------------------------------------------------------------------------------
-  ##------------------------------------------------------------------------------------------------------------
-  # change bin size
   observeEvent(input$update_bin, {
     withBusyIndicatorServer("update_bin", {
       withProgress(message = 'Binning in progress',
@@ -163,7 +186,7 @@ server <- function(input, output, session) {
   output$seqLen <- DT::renderDT({
     shiny::validate(need(rv$seq_len, ""))
     
-    datatable(rv$seq_len[order(-rlen),],
+    datatable(rv$seq_len,
               rownames = FALSE, class = 'display compact row-border', 
               selection = 'single', filter = 'bottom', colnames = c("Sequence", "Length"), 
               options = list(
@@ -172,7 +195,7 @@ server <- function(input, output, session) {
                 scrollY = "400px",
                 initComplete = JS(
                   "function(settings, json) {",
-                  "$(this.api().table().header()).css({'background-color': '#F0F0F0', 'color': '#000'});",
+                  "$(this.api().table().header()).css({'background-color': 'lightgray', 'color': '#000'});",
                   "}")
               )
     )
@@ -193,10 +216,10 @@ server <- function(input, output, session) {
     
     if(is.null(seq_index)) return(NULL)
     
-    seq_selected <- rv$seq_len[seq_index, 1]
-    
+    seq_selected <- rv$seq_len$rname[seq_index]
+
     datatable(
-      rv$contact_data2[rname != mrnm,][rname == seq_selected,],
+      rv$contact_data2[rname == seq_selected | mrnm == seq_selected,],
       rownames = FALSE, class = 'display compact cell-border', filter = 'bottom',
       options = list(
         pageLength = 15, dom = 'lti', autoWidth = TRUE,
@@ -292,7 +315,7 @@ server <- function(input, output, session) {
                        .[(rname != tgt_contig & mrnm != tgt_contig),] %>%
                        rbind(., rv$tgt_contig_data)
                      
-                     ## Update sequence length
+                     ## Get new sequence length
                      rv$seq_len <- rv$contact_data2[,.(rlen = max(pos)), by = .(rname)] %>%
                        .[order(rname),]
                      
@@ -354,7 +377,7 @@ server <- function(input, output, session) {
                                          step = rv$binsize_ini , max = 500000)
                      }
                      
-                     rv$interseq_links <-  rv$seq_len[rv$contact_data2[rname != mrnm,], on = c("rname")] %>%
+                     rv$interseq_link_counts <-  rv$seq_len[rv$contact_data2[rname != mrnm,], on = c("rname")] %>%
                        .[rv$seq_len, on = c("mrnm" = "rname"), ':='(mrnm_len = i.rlen)] %>%
                        .[((pos < edge_slc | pos > rlen - edge_slc) & (mpos < edge_slc | mpos > mrnm_len - edge_slc)),] %>%
                        .[, ':='(rname_strand = ifelse(pos < edge_slc, "-", 
@@ -373,7 +396,7 @@ server <- function(input, output, session) {
                          by = .(rname, mrnm, rname_strand, mrnm_strand, rlen, mrnm_len)]
                      
                      #bin_rname =(link_no/ceiling(min(edge_rname,edge_mrnm)/rv$binsize))/10
-                     rv$choices <- unique(rv$interseq_links$rname)
+                     rv$choices <- unique(rv$interseq_link_counts$rname)
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
                                                                border-bottom: 1px solid gray;", length(rv$choices)), 
                                                        "background-color: lightgray;"))
@@ -408,22 +431,22 @@ server <- function(input, output, session) {
       withProgress(message = 'Importing interactions file',
                    detail = 'please wait ...', value = 1, {
                      
-                     interseq_links <- fread(file.path(rv$projDir,input$lnkFile)) 
+                     interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile)) 
                      
                      # These columns are being used for downstream calculations
                      required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rlen", "link_density")
                      
-                     if(any(required_cols %!in% names(interseq_links)))
+                     if(any(required_cols %!in% names(interseq_link_counts)))
                        stop(paste("Columns", paste0(required_cols, collapse = ", "), 
                                   "must be present in the file"))
                      
-                     rv$interseq_links <- interseq_links
+                     rv$interseq_link_counts <- interseq_link_counts
                    })
     })
   })
   
-  output$interseqData <- DT::renderDataTable({
-    DT::datatable(rv$interseq_links ,
+  output$interactionCounts <- DT::renderDataTable({
+    DT::datatable(rv$interseq_link_counts ,
                   escape = FALSE, filter = 'bottom', rownames= FALSE, 
                   class = 'nowrap display compact order-column cell-border stripe', 
                   extensions = c('Buttons', 'ColReorder'), selection = "single",
@@ -448,12 +471,12 @@ server <- function(input, output, session) {
   })
   
   
-  output$interseqLinks <- downloadHandler(
+  output$interactionCountsExp <- downloadHandler(
     filename = function() {
-      paste(Sys.Date(), 'interseq_Links_EdgeSize',rv$edge_slc, '.csv', sep='')
+      paste(Sys.Date(), 'interseq_link_counts',rv$edge_slc, '.csv', sep='')
     },
     content = function(con) {
-      write.csv(rv$interseq_links , con)
+      fwrite(rv$interseq_link_counts , con, row.names = FALSE)
     }
   )
   ##------------------------------------------------------------------------------------------------------------
@@ -612,7 +635,7 @@ server <- function(input, output, session) {
         coord_cartesian(ylim = rv$intramap_range, 
                         xlim = rv$intramap_range) 
       
-    session$resetBrush("intramap_brush")
+      session$resetBrush("intramap_brush")
     } else {
       p <- rv$intramap_plot 
     }
@@ -742,7 +765,7 @@ server <- function(input, output, session) {
                                                            length(rv$choices)
                                              ), 
                                              "background-color: lightgray;")
-                                           )
+                     )
                      
                      updatePickerInput(session, "seq", choices = rv$choices, 
                                        selected = new_scaffold,
@@ -758,7 +781,7 @@ server <- function(input, output, session) {
   })
   
   
-  ###--------save changes----------- 
+  ###--------save changes to disk------------ 
   observeEvent(input$svChanges, {
     withBusyIndicatorServer("svChanges", {
       base_name <- sub("\\d+-\\d+-\\d+_(\\w+).rds|.bin|.txt*", "\\1",input$mapFile, 
@@ -847,7 +870,7 @@ server <- function(input, output, session) {
   ##----------------------------------------------------------------------------  
   ##---------------------------------------------------------------------------- 
   
-  # move up and down the options list ---------------
+  # move up and down the options list ------------------------------------------
   observeEvent(input$down1,{
     shiny::validate(need(rv$choices2, ""))
     
@@ -872,7 +895,7 @@ server <- function(input, output, session) {
     updatePickerInput(session, "subseq2",  selected = rv$choices2[i])
     shinyWidgets::updateSwitchInput(session, "strand_3", value = strand_3 == "+")
   })
-  #-------------------------------------------------
+  #-----------------------------------------------------------------------------
   
   scaffold_map <- reactive({
     shiny::validate(need(input$subseq2, ""))
@@ -1034,59 +1057,12 @@ server <- function(input, output, session) {
           rv$chr <-  c(input$joined_seqs, rv$s2.1)
         }
       }
+      
       updateCheckboxGroupInput(session, "joined_seqs", NULL, 
                                choices = unique(rv$chr), selected = unique(rv$chr))
       updateTextAreaInput(session, "scaf_edit", NULL, 
                           value = paste(unique(rv$chr), collapse = "\n"))
     })
-  })
-  
-  ## copy to clipboard
-  observeEvent(input$clipbtn, clipr::write_clip(input$joined_seqs, allow_non_interactive = TRUE))
-  
-  ## erase the list 
-  observeEvent(input$erase,{ 
-    choices =  input$joined_seqs
-    updateCheckboxGroupInput(session, "joined_seqs", NULL, choices =  choices[1], selected =  choices[1])
-  })
-  
-  ## edit the list 
-  observeEvent(input$edit,{ 
-    shinyjs::show("EditBox")
-    hide("CheckBox")
-    hide("edit")
-    shinyjs::show("check")
-  })
-  
-  observeEvent(input$check,{ 
-    
-    choices = base::strsplit(input$scaf_edit, "\n")[[1]]
-    updateCheckboxGroupInput(session, "joined_seqs", NULL, choices =  choices, selected =  choices)
-    
-    shinyjs::hide("EditBox")
-    shinyjs::show("CheckBox")
-    shinyjs::show("edit")
-    shinyjs::hide("check")
-  })
-  
-  
-  observeEvent(input$export,{
-    shiny::validate(need(input$joined_seqs, ""))
-    
-    out_dir <- file.path(rv$projDir,"groups")
-    dir.create(out_dir, showWarnings = FALSE)
-    
-    super_seq <- data.table(name = input$joined_seqs) %>%
-      .[, ':='(name = substr(name, 2, nchar(name)),
-               rc=ifelse(grepl("\\+", name), 0, 1),
-               q = ".", 
-               gap_size = ".")]
-    
-    # get next group number
-    n <- length(list.files(out_dir))
-    
-    file = paste0(out_dir, "/group",n,".ordering")
-    write.table(super_seq, file, row.names = FALSE, col.names = FALSE, quote = FALSE) 
   })
   
   observe({
@@ -1105,12 +1081,110 @@ server <- function(input, output, session) {
     leading_seq <- ifelse(input$dir2 == 'Backward', chr[1], chr[length(chr)])
     
     updatePickerInput(session, "seq2", selected = gsub("^[-+]","",leading_seq))
-    shinyWidgets::updateSwitchInput(session, "strand_2", value = substr(leading_seq, 1, 1) == "+", disabled = disable_switch)
+    shinyWidgets::updateSwitchInput(session, "strand_2", 
+                                    value = substr(leading_seq, 1, 1) == "+", 
+                                    disabled = disable_switch)
     updateNumericInput(session, "n", value = 1)
   })
   
-  # plot hi-c map for chr
-  #------------------------
+  ##----------------------------------------------------------------------------
+  ##----------------------------------------------------------------------------
+  ## Copy to clipboard
+  observeEvent(input$clipbtn, {
+    clipr::write_clip(input$joined_seqs, 
+                      allow_non_interactive = TRUE)
+  })
+  
+  ## Erase the list 
+  observeEvent(input$erase,{ 
+    choices =  input$joined_seqs
+    updateCheckboxGroupInput(session, "joined_seqs", NULL, 
+                             choices =  choices[1], 
+                             selected =  choices[1])
+  })
+  
+  ## Edit the list manually 
+  observeEvent(input$edit,{ 
+    shinyjs::show("EditBox")
+    hide("CheckBox")
+    hide("edit")
+    shinyjs::show("check")
+  })
+  
+  observeEvent(input$check,{ 
+    
+    choices = base::strsplit(input$scaf_edit, "\n")[[1]]
+    updateCheckboxGroupInput(session, "joined_seqs", NULL, 
+                             choices =  choices, 
+                             selected =  choices)
+    
+    shinyjs::hide("EditBox")
+    shinyjs::show("CheckBox")
+    shinyjs::show("edit")
+    shinyjs::hide("check")
+  })
+  
+  ## output groups to build fasta file using CreateScaffoldFasta.pl script
+  observeEvent(input$export,{
+    shiny::validate(need(input$joined_seqs, ""))
+    
+    out_dir <- file.path(rv$projDir,"groups")
+    dir.create(out_dir, showWarnings = FALSE)
+
+    rv$new_scaffold <- data.table(rname = sub("^[-+]","", input$joined_seqs),
+                               rc = ifelse(grepl("^\\+", input$joined_seqs), 0, 1)) %>%
+      .[rv$seq_len, on = "rname", nomatch=0] %>%
+      .[, ':='(start = ifelse(grepl("fragment", rname), as.numeric(gsub(".*_(\\d+):.*", "\\1", rname)), 0),
+          end = ifelse(grepl("fragment", rname), as.numeric(gsub(".*:(\\d+)", "\\1", rname)), rlen),
+          contig = sub("_fragment.*", "", rname),
+          id = seq_len(.N),
+          name = "")] %>%
+      .[, .(name, contig, fragment = rname, id, rc, start, end)]
+    
+    # Get next group number
+    n <- length(list.files(out_dir))
+    
+    file = paste0(out_dir, "/group",n,".ordering")
+    fwrite(rv$new_scaffold, file, quote = FALSE) 
+  })
+  
+  observeEvent(input$export, {
+    # Create fasta file
+    hic_scaffolds <- list()
+    
+    for (s in unique(groups$name))
+    {
+      # init vars
+      scaffold_seq <- NULL
+      gap <- NULL
+      gap_size <- 100
+      
+      # filter data
+      data <- groups[groups$name == s,]
+      
+      for (i in 1:nrow(data))
+      {
+        contig_seq <- subseq(fasta[[data$contig[i]]], start = data$start[i], end = data$end[i])
+        
+        if(data$rc[i]){contig_seq <- reverseComplement(contig_seq)}
+        
+        scaffold_seq <- paste0(scaffold_seq, gap ,as.character(contig_seq))
+        gap <- paste(rep("N", gap_size), collapse = '')
+      }
+      hic_scaffolds[[s]] <- scaffold_seq
+    }
+    
+    hic_scaffolds <- DNAStringSet(sapply(hic_scaffolds, `[[`, 1))
+    
+    Biostrings::writeXStringSet(hic_scaffolds, "C:/Users/saeia/OneDrive - AgResearch/shared_with_andrew/T.repens_genome/hic_assembly.fasta")
+  })
+  
+  
+  
+  #-----------------------------------------------------------------------------
+  #-----------------------------------------------------------------------------
+  # plot hi-c map for whole sequence
+
   observeEvent(input$combineMaps,{
     withBusyIndicatorServer("combineMaps",{
       withProgress(message = 'Preparing contact data', value = 1, 
@@ -1164,8 +1238,7 @@ server <- function(input, output, session) {
   
   output$map2_hoverinfo <- renderTable({
     shiny::validate(need(rv$combined_maps, ""))
-    # For base graphics, we need to specify columns, though for ggplot2,
-    # it's usually not necessary.
+    
     res <- nearPoints(rv$combined_maps, input$map2_hover, "pos", "mpos", threshold = 1, maxpoints = 1)
     
     if(nrow(res) == 0)

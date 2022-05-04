@@ -27,7 +27,7 @@ shinyUI(
                                             ),
                                             div(style = "margin-top: -30px;",
                                                 withBusyIndicatorUI(
-                                                  actionButton("calcIntraction2", "Calculate", class = "action_button",
+                                                  actionButton("calcIntraction2", "Calculate", class = "btn-action",
                                                                icon = icon('calculator', lib = "font-awesome"))
                                                 )
                                             )
@@ -43,7 +43,7 @@ shinyUI(
                                        ),
                                        div(style = "margin-top: 0px;",
                                            withBusyIndicatorUI(
-                                             actionButton("importLnkFile", "Import", class = "action_button",
+                                             actionButton("importLnkFile", "Import", class = "btn-action",
                                                           icon = icon('import', lib = "glyphicon"))
                                            )
                                        )
@@ -53,12 +53,13 @@ shinyUI(
                          ),
                          
                          
+                         
                          tags$button(id = "scafConfig", class = "btn btn-default btn-md btn-accordion",
                                      list(NULL, label = "Scaffolding"),
                                      htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                          ),
                          div(style = "border: 1px solid #E8E8E8; border-radius: 5px; padding: 2px;  background-color: white; margin-top: 0px; ",
-                             div(id = "ScafConfig", style = "padding: 5px;",
+                             div(id = "ScafConfig", style = "padding: 5px; display: none;",
                                  div(
                                      fluidRow(style = "margin: 0px;",
                                               radioGroupButtons("dir2", "Leading sequence:", size = "xs",
@@ -117,7 +118,7 @@ shinyUI(
                                      #tags$hr(), 
                                      div(style = "margin-top: 10px;",
                                          withBusyIndicatorUI(
-                                           actionButton("add", "Add to scaffold", class = "action_button", 
+                                           actionButton("add", "Add to scaffold", class = "btn-action", 
                                                         icon = icon("add", lib = "glyphicon"))
                                          )
                                      )
@@ -127,14 +128,25 @@ shinyUI(
                 )
                 #tags$hr()
                 #p("Batch run: plot Hi-C maps of 20 most likley sequences to follow the selected sequence"),
-                #actionButton("build_map", "Run", width = '100%', class = "action_button")
+                #actionButton("build_map", "Run", width = '100%', class = "btn-action")
             ),
-            div(style = "margin-left: 250px;",   
+            div(style = "margin-left: 250px;",  
+                div(
+                  actionButton("vwData1", "Data View",icon = icon("table"), width = "285px", class= "slide-btn")
+                ),
+                fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
+                         div(id = "DataView1", style = "margin: 0px; display: none;",  
+                             div(style = "background: #ece9df; border: 1px solid #E8E8E8; border-radius: 3px; padding: 5px; margin: 0 2px 0 10px;",
+                                 DT::DTOutput("interactionCounts") ,
+                                 downloadButton("interactionCountsExp", "Download All Data")
+                                 )
+                         )
+                ),
                 div(
                   actionButton("vwScaf", "Scaffolding View",icon = icon("table"), width = "285px", class= "slide-btn")
                 ),
                 fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
-                         div(id = "VwScaf", style ="height: calc(100% + 160px);",
+                         div(id = "VwScaf", style ="height: calc(100% + 160px); display: none;",
                              div(style = "border: 1px solid #E8E8E8; padding: 5px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 300px; float: left;",
                                  #div("Setting", icon("triangle-bottom", class = "glyph-icon", lib = "glyphicon")),
                             
@@ -186,11 +198,11 @@ shinyUI(
                                  div(style = "border-left: 1px solid #E8E8E8;",
                                  div(
                                    actionButton("vwJointMap", "Scaffolding Map",icon = icon("table"), width = "200px"),
-                                   tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 20px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                   tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
                                  ),
-                                 fluidRow(id = "VwJointMap",  style = "margin: 2px 0 0 10px; border:  1px solid #E8E8E8; border-radius: 5px;",
-                                          div(style = "font-size: 12px; font-family: Tahoma; float: left;",
+                                 fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
+                                          div(id = "VwJointMap", style = "font-size: 12px; font-family: Tahoma; float: left;",
                                               fluidRow(style = "margin: 2px 5px 0 5px; background: #ece9df; padding: 1px; border: 1px solid #F4F4F4; height: 37px; border-radius: 5px;",
                                                        div("Number of sequences to plot from the leading end:", style = "width: 300px; float: left; padding: 7px;"),
                                                        div(style = "width: calc(100% - 300px); float: left;",
@@ -199,7 +211,7 @@ shinyUI(
                                               ),
                                               div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 5px 5px 5px 5px; font-size: 12px;",
                                                   div(
-                                                    actionBttn("exitZoom2", NULL, icon = icon('home', lib = "glyphicon"), 
+                                                    actionBttn("exitZoom2", NULL, icon = icon('zoom-out', lib = "glyphicon"), 
                                                                style = "material-circle", size = "xs"),
                                                     actionBttn("clearBrush2", NULL, icon = icon('erase', lib = "glyphicon"), 
                                                                style = "material-circle", size = "xs")
@@ -211,17 +223,26 @@ shinyUI(
                                                         withLoader(type = "html")
                                                   )
                                               )
-                                              
-                                              # div(style = "border: 1px solid #E8E8E8; border-radius: 5px; padding: 0px; background: #ece9df; margin: 0px 5px 0px 5px; font-size: 12px; font-family: Tahoma;",
-                                              #     div(id = "VwIntData", style = "border: 1px solid white; border-radius: 5px; margin: 0px;",
-                                              #         DT::DTOutput("interseqData") 
-                                              #     ),
-                                              #     downloadButton("interseqLinks", "Download All Data")
-                                              # )
-                                              
                                           ),
-                                          fluidRow(style = "float: right; width: calc(100% - 85vh); padding: 5px; border: 1px solid #E8E8E8; border-radius: 3px; margin: 1px;",
-                                                DTOutput("Subsequent") 
+                                          div(style = "width: calc(100% - 84vh); float: left; margin-left: -3px;",
+                                              div(style = "border-left: 1px solid #E8E8E8; border-radius: 3px;",
+                                                  div(
+                                                    actionButton("dddd", "Assembly Stats",icon = icon("stats"), width = "200px"),
+                                                    tags$style(HTML("#dddd{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                               padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: 0px;}"))
+                                                  ),
+                                                  fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; ",
+                                                           DTOutput("Subsequent")
+                                                  ),
+                                                  div(
+                                                    actionButton("vwLnkData", "Contact Data",icon = icon("table"), width = "200px"),
+                                                    tags$style(HTML("#vwLnkData{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                               padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: 0px;}"))
+                                                  )
+                                              ),
+                                              fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;"
+                                                       
+                                              )
                                           )
                                  ),
                                  div(
@@ -230,7 +251,7 @@ shinyUI(
                                                     padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
                                  )
                                  ),
-                                 fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px; ",
+                                 fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
                                           div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
                                               div(style = "width: calc(100% - 270px); float: left;",
                                                   div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; background: #ece9df;font-size: 12px; font-family: Tahoma; margin: 0px 5px 0px 5px; ",

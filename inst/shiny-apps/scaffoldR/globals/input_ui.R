@@ -31,10 +31,6 @@ shinyUI(
                                                                       width = "100%",showTick = TRUE)
                                            )
                                        )
-                                     ),
-                                     conditionalPanel(
-                                       condition = "input.mapSrc == 'Remote'",
-                                       selectizeInput("remoteSrc", NULL, choices = "DropBox")
                                      )
                                  ),
                                  div(
@@ -68,53 +64,102 @@ shinyUI(
                                  ),
                                  div(style = "margin-top: 0px;",
                                      withBusyIndicatorUI(
-                                       actionButton("import_data", "Import Data", class = "action_button",
+                                       actionButton("import_data", "Import Data", class = "btn-action",
                                                     icon = icon('import', lib = "glyphicon"))
+                                     )
+                                 ),
+                                 div(style = "margin-top: 15px;",
+                                     numericInput("binsize2", "Bin size (bp):", value = 1, min = 0, max = 500000, step= 10000),
+                                     div(style = "margin-top: -13px;",
+                                         sliderInput("binsize", NULL, min = 0, value = 0, max = 0, width = '100%', ticks = TRUE)
+                                     ),
+                                     div(style = "margin-top: -30px;",
+                                         withBusyIndicatorUI(
+                                           actionButton("update_bin", "Update", class = "btn-update",
+                                                        icon = icon('play', lib = "glyphicon"))
+                                         )
                                      )
                                  )
                              )
                          ),
-                         tags$button(id = "dtBin", class = "btn btn-default btn-md btn-accordion",
-                                     list(NULL, label = "Bin Size Update"),
+                         tags$button(id = "faInput", class = "btn btn-default btn-md btn-accordion",
+                                     list(NULL, label = "Assembly Input (Optional)"),
                                      htmltools::tags$span(class = "glyphicon glyphicon-triangle-bottom")
                          ),
                          div(style = "border: 1px solid #E8E8E8; border-radius: 3px; padding: 2px;  background-color: white; margin-bottom: 10px;",
-                             div(id = "DtBin" , style = "padding: 10px;",
-                                 
-                                 fluidRow(style = "margin: 0px;",
-                                          numericInput("binsize2", "Bin Size (bp):", value = 1, min = 0, max = 500000, step= 10000),
-                                          div(style = "margin-top: -13px;",
-                                              sliderInput("binsize", NULL, min = 0, value = 0, max = 0, width = '100%', ticks = TRUE)
-                                          ),
-                                          div(style = "margin-top: -30px;",
-                                              withBusyIndicatorUI(
-                                                actionButton("update_bin", "Update", class = "action_button",
-                                                             icon = icon('play', lib = "glyphicon"))
-                                              )
-                                          )
+                             div(id =  "FAInput", style = "padding: 10px; display: none;",
+                                 radioGroupButtons("faSrc", "FASTA file:", choices = c("Local", "Remote"), selected = "Local", 
+                                                   justified = TRUE, size = "xs", status = "gray", 
+                                                   checkIcon = list(
+                                                     yes = tags$i(class = "fa fa-circle", 
+                                                                  style = "color: black"),
+                                                     no = tags$i(class = "fa fa-circle-o", 
+                                                                 style = "color: white"))),
+                                 div(style = "margin-top: -13px;",
+                                     conditionalPanel(
+                                       condition = "input.faSrc == 'Local'",
+                                       #shiny::fileInput("contactMap", NULL, accept = c("csv", ".txt", ".rds"), width = '100%'),
+                                       #shinyFiles::shinyDirButton('directory', label='Set Data Directory', 
+                                       #                           title='Please select a folder', 
+                                       #                           class = "btn-dir", icon = icon("folder-open")),
+                                       #verbatimTextOutput("dirPath"),
+                                       div(style = "margin-top: 0px;",
+                                           pickerInput("faFile", NULL, choices = NULL , multiple = FALSE,
+                                                       options = list(style = "btn-default btn-md btn-picker", size = 20, 
+                                                                      `live-search` = TRUE,  tickIcon = "glyphicon-ok", 
+                                                                      width = "100%",showTick = TRUE)
+                                           )
+                                       ),
+                                     ),
+                                     conditionalPanel(
+                                       condition = "input.faSrc == 'Remote'",
+                                       selectizeInput("faSrc", NULL, choices = "DropBox")
+                                     )
+                                 ),
+                                 div(style = "margin-top: 0px;",
+                                     withBusyIndicatorUI(
+                                       actionButton("import_fasta", "Import FASTA", class = "btn-action",
+                                                    icon = icon('import', lib = "glyphicon"))
+                                     )
                                  )
                              )
                          )
+                         
+                         
+                         
                 )
                 #tags$hr()
                 #p("Batch run: plot Hi-C maps of 20 most likley sequences to follow the selected sequence"),
-                #actionButton("build_map", "Run", width = '100%', class = "action_button")
+                #actionButton("build_map", "Run", width = '100%', class = "btn-action")
             ),
             div(style = "margin-left: 250px;",   
                 div(
                   actionButton("vwData", "Data View",icon = icon("table"), width = "285px", class= "slide-btn")
                 ),
-                fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; padding: 1px; font-family: Tahoma; font-size: 12px; ",
-                         div(id = "DataView", 
-                             div(style = "width: 500px; float: left; background: #ece9df;",
-                                 plotOutput("lenHist")
+                fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
+                         div(id = "DataView", style = "margin: 0px; display: none;",  
+                             div(style = "width: 300px; float: left; background: #ece9df; border: 1px solid #E8E8E8; border-radius: 3px; padding: 5px; margin: 0 2px 0 10px;",
+                                 DT::DTOutput('seqLen')
                              ),
-                             div(style = "float: left; border-top: 20px solid #ece9df; width: calc(100% - 505px);", 
-                                 div(style = "width: 300px; float: left; background: #ece9df; border: 1px solid #E8E8E8; padding: 5px; margin-top: -5px;",
-                                     DT::DTOutput('seqLen')
+                             div(style = "width: calc(100% - 330px); float: left;",
+                                 div(style = "border-left: 1px solid #E8E8E8; border-radius: 3px;",
+                                     div(
+                                       actionButton("vwStats", "Assembly Stats",icon = icon("stats"), width = "200px"),
+                                       tags$style(HTML("#vwStats{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                               padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: 0px;}"))
+                                     ),
+                                     fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",
+                                              plotOutput("lenHist", width = "500px")
+                                     ),
+                                     
+                                     div(
+                                       actionButton("vwLnkData", "Contact Data",icon = icon("table"), width = "200px"),
+                                       tags$style(HTML("#vwLnkData{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                               padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: 0px;}"))
+                                     )
                                  ),
-                                 div(style = "float: right; background: #ece9df; width: calc(100% - 310px); padding: 5px; margin-top: -1px; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;",
-                                     DT::DTOutput('contactData')
+                                 fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",
+                                          DT::DTOutput('contactData')
                                  )
                              )
                          )
@@ -147,7 +192,7 @@ shinyUI(
                                    div(style = "border: 1px solid #E8E8E8; padding: 1px; background-color: white; margin-bottom: 10px;",
                                        div(id ="IntConfig1", style = "padding: 10px;",
                                            fluidRow(style = "margin: 0px;",
-                                                    numericInput("edgeSize1", "Edge Size:", value = 1, 
+                                                    numericInput("edgeSize1", "Edge Size (bp):", value = 1, 
                                                                  min = 0, max = 500000, step= 10000),
                                                     div(style = "margin-top: -13px;",
                                                         sliderInput("edgeSize2", NULL, value = 0, 
@@ -155,7 +200,7 @@ shinyUI(
                                                     ),
                                                     div(style = "margin-top: -30px;",
                                                         withBusyIndicatorUI(
-                                                          actionButton("calcIntraction1", "Calculate", class = "action_button",
+                                                          actionButton("calcIntraction1", "Calculate", class = "btn-action",
                                                                        icon = icon('calculator', lib = "font-awesome"))
                                                         )
                                                     )
@@ -192,7 +237,7 @@ shinyUI(
                                                                            offStatus = "primary", labelWidth = '70', handleWidth = '70')
                                              ),
                                              withBusyIndicatorUI(
-                                               actionButton("join", "Join", class = "action_button",
+                                               actionButton("join", "Join", class = "btn-action",
                                                             icon = icon('plus-sign', lib = "glyphicon"))
                                              )
                                          )
@@ -221,11 +266,11 @@ shinyUI(
                                               div(style = "margin-top: -5px; margin-right: 10px;",
                                                   conditionalPanel(
                                                     condition = "input.action == 'Cut'",
-                                                    numericInput("cutPos", "Break position:", value = 0, 
+                                                    numericInput("cutPos", "Break position (bp):", value = 0, 
                                                                  min = 0, max = 50000000, step= 100),
                                                     textInput("frag2Name", "Second fragmnet name:", value = "Default",  width = '100%'),
                                                     withBusyIndicatorUI(
-                                                      actionButton("cut1", "Cut Sequence", class = "action_button", 
+                                                      actionButton("cut1", "Break Sequence", class = "btn-action", 
                                                                    icon = icon('scissors', lib = "glyphicon"))
                                                     )
                                                   )
@@ -247,7 +292,7 @@ shinyUI(
                                  div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 0px 5px 5px 5px; font-size: 12px;",
                                      conditionalPanel(
                                        condition = "input.action != 'Join'",
-                                       actionBttn("exitZoom1", NULL, icon = icon('home', lib = "glyphicon"), style = "material-circle", size = "xs"),
+                                       actionBttn("exitZoom1", NULL, icon = icon('zoom-out', lib = "glyphicon"), style = "material-circle", size = "xs"),
                                        actionBttn("clearBrush1", NULL, icon = icon('erase', lib = "glyphicon"), style = "material-circle", size = "xs"),
                                        actionBttn("cut2", NULL, icon = icon('scissors', lib = "glyphicon"), style = "material-circle", size = "xs"),
                                        div(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh; margin-top: 5px;",
