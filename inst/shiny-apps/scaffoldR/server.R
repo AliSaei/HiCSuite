@@ -431,8 +431,13 @@ server <- function(input, output, session) {
       withProgress(message = 'Importing interactions file',
                    detail = 'please wait ...', value = 1, {
                      
-                     interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile)) 
+                     if(grepl(".rds",input$lnkFile, ignore.case = TRUE)){
+                       interseq_link_counts <- readRDS(file.path(rv$projDir, input$lnkFile))
+                     } else {
+                       interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile))
+                     }
                      
+              
                      # These columns are being used for downstream calculations
                      required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rlen", "link_density")
                      
