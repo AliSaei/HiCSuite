@@ -14,6 +14,10 @@ library(Biostrings)
 options(future.globals.maxSize = 300*1024^2,
         shiny.maxRequestSize=300*1024^2)
 
+
+# Negate %in% function 
+`%!in%` = Negate(`%in%`)
+
 ##N50 and N90 calculation
 N50 <- function(x) {
   contig_no = length(x)
