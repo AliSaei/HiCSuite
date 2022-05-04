@@ -36,7 +36,7 @@ server <- function(input, output, session) {
   observe({
     rv$projDir <- parseDirPath(volumes, input$directory)
     
-    rds_list <- list.files(rv$projDir, pattern = ".rds$|.bin|.txt", 
+    rds_list <- list.files(rv$projDir, pattern = ".rds$|.bin|.txt|.csv", 
                            recursive = TRUE, ignore.case = TRUE)
     txt_list <- list.files(rv$projDir, pattern = ".csv$|.txt$|.tab$", 
                            recursive = TRUE, ignore.case = TRUE)
@@ -61,7 +61,7 @@ server <- function(input, output, session) {
                       margin-left: -10px; border-bottom: 1px solid gray;", 
                                 length(fa_list)), "background-color: lightgray;")))
     
-    updatePickerInput(session, "lnkFile", choices = txt_list,                           
+    updatePickerInput(session, "lnkFile", choices = rds_list,                           
                       choicesOpt = list(style = paste(
                         rep_len("font-size: 12px; line-height: 1.5; 
                       margin-left: -10px; border-bottom: 1px solid gray;", 
@@ -446,7 +446,7 @@ server <- function(input, output, session) {
   })
   
   output$interactionCounts <- DT::renderDataTable({
-    DT::datatable(rv$interseq_link_counts ,
+    DT::datatable(rv$interseq_link_counts[link_no > 10,],
                   escape = FALSE, filter = 'bottom', rownames= FALSE, 
                   class = 'nowrap display compact order-column cell-border stripe', 
                   extensions = c('Buttons', 'ColReorder'), selection = "single",
@@ -473,25 +473,35 @@ server <- function(input, output, session) {
   
   output$interactionCountsExp <- downloadHandler(
     filename = function() {
-      paste(Sys.Date(), 'interseq_link_counts',rv$edge_slc, '.csv', sep='')
+      paste(Sys.Date(), '-interseq_link_counts-',rv$edge_slc, '.csv', sep='')
     },
     content = function(con) {
       fwrite(rv$interseq_link_counts , con, row.names = FALSE)
     }
   )
+  
+  observeEvent(input$svInteractionCounts, {
+    withBusyIndicatorServer("svInteractionCounts", {
+      file_name <- paste(Sys.Date(), '-interseq_link_counts-',rv$edge_slc, '.rds', sep='')
+      
+      saveRDS(rv$contact_data2, 
+              file.path(rv$projDir, file_name)
+      )
+    })
+  })
   ##------------------------------------------------------------------------------------------------------------
   ##------------------------------------------------------------------------------------------------------------
   observe({
     shiny::validate(need(input$seq1, ""))
-    shiny::validate(need(rv$interseq_links, ""))
+    shiny::validate(need(rv$interseq_link_counts, ""))
     
     seq <- input$seq1
     
     if(input$dir1 == "Backward"){
-      subseq1 <- rv$interseq_links[mrnm %in% seq & (!rname %in% seq),] %>%
+      subseq1 <- rv$interseq_link_counts[mrnm %in% seq & (!rname %in% seq),] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequent_seq = rname, Strand = rname_strand)] 
     } else {
-      subseq1 <- rv$interseq_links[rname %in% seq & (!mrnm %in% seq),] %>%
+      subseq1 <- rv$interseq_link_counts[rname %in% seq & (!mrnm %in% seq),] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequent_seq = mrnm, Strand = mrnm_strand)]
     }
     
@@ -670,7 +680,7 @@ server <- function(input, output, session) {
     shiny::validate(need(input$action == "Join", ""))
     shiny::validate(need(input$seq1, ""))
     shiny::validate(need(input$subseq1, ""))
-    shiny::validate(need(rv$interseq_links, ""))
+    shiny::validate(need(rv$interseq_link_counts, ""))
     
     strand <- ifelse(input$subseq1_strand, "+", "-")
     subseq = paste0(strand, input$subseq1)
@@ -797,7 +807,7 @@ server <- function(input, output, session) {
   ##------------------------------------------------------------------------------------------------------------
   observe({
     shiny::validate(need(input$seq2, ""))
-    shiny::validate(need(rv$interseq_links, ""))
+    shiny::validate(need(rv$interseq_link_counts, ""))
     shiny::validate(need(input$nrSeq, ""))
     
     len <- length(isolate(input$joined_seqs))
@@ -817,13 +827,13 @@ server <- function(input, output, session) {
     }
     
     if(input$dir2 == "Forward"){
-      rv$subseq2 <- rv$interseq_links[rname %in% leading_seq & 
+      rv$subseq2 <- rv$interseq_link_counts[rname %in% leading_seq & 
                                         (!mrnm %in% leading_seq) & 
                                         link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), 
           .(Subsequent_seq = mrnm, Length = mrnm_len, Strand = mrnm_strand, link_no, link_density)]
     } else {
-      rv$subseq2 <- rv$interseq_links[mrnm %in% leading_seq & 
+      rv$subseq2 <- rv$interseq_link_counts[mrnm %in% leading_seq & 
                                         (!rname %in% leading_seq) & 
                                         link_density <= maxLinkDen & 
                                         rlen >= minSeqLen,] %>%
