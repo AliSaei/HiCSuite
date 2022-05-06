@@ -41,7 +41,7 @@ server <- function(input, output, session) {
     txt_list <- list.files(rv$projDir, pattern = ".csv$|.txt$|.tab$", 
                            recursive = TRUE, ignore.case = TRUE)
     fa_list <- list.files(rv$projDir, pattern = ".fa$|.fasta$", 
-                           recursive = TRUE, ignore.case = TRUE)
+                          recursive = TRUE, ignore.case = TRUE)
     
     
     updatePickerInput(session, "mapFile", choices = rds_list,                           
@@ -65,7 +65,7 @@ server <- function(input, output, session) {
                       choicesOpt = list(style = paste(
                         rep_len("font-size: 12px; line-height: 1.5; 
                       margin-left: -10px; border-bottom: 1px solid gray;", 
-                                length(txt_list)), "background-color: lightgray;")))
+                                length(rds_list)), "background-color: lightgray;")))
   })
   
   
@@ -145,7 +145,7 @@ server <- function(input, output, session) {
     })
   })
   
-
+  
   
   ##----------------------------------------------------------------------------
   ##----------------------------------------------------------------------------
@@ -217,7 +217,7 @@ server <- function(input, output, session) {
     if(is.null(seq_index)) return(NULL)
     
     seq_selected <- rv$seq_len$rname[seq_index]
-
+    
     datatable(
       rv$contact_data2[rname == seq_selected | mrnm == seq_selected,],
       rownames = FALSE, class = 'display compact cell-border', filter = 'bottom',
@@ -437,8 +437,6 @@ server <- function(input, output, session) {
                        interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile))
                      }
                      
-                     interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile)) 
-                     
                      # These columns are being used for downstream calculations
                      required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rlen", "link_density")
                      
@@ -488,11 +486,14 @@ server <- function(input, output, session) {
   
   observeEvent(input$svInteractionCounts, {
     withBusyIndicatorServer("svInteractionCounts", {
-      file_name <- paste(Sys.Date(), '-interseq_link_counts-',rv$edge_slc, '.rds', sep='')
-      
-      saveRDS(rv$interseq_link_counts, 
-              file.path(rv$projDir, file_name)
-      )
+      withProgress(message = 'Saving link data',
+                   detail = 'please wait ...', value = 1, {
+                     file_name <- paste(Sys.Date(), '-interseq_link_counts-',rv$edge_slc, '.rds', sep='')
+                     
+                     saveRDS(rv$interseq_link_counts, 
+                             file.path(rv$projDir, file_name)
+                     )
+                   })
     })
   })
   ##------------------------------------------------------------------------------------------------------------
@@ -800,12 +801,15 @@ server <- function(input, output, session) {
   ###--------save changes to disk------------ 
   observeEvent(input$svChanges, {
     withBusyIndicatorServer("svChanges", {
-      base_name <- sub("\\d+-\\d+-\\d+_(\\w+).rds|.bin|.txt*", "\\1",input$mapFile, 
-                       ignore.case = TRUE)
-      
-      saveRDS(rv$contact_data2, 
-              file.path(rv$projDir, paste0(Sys.Date(), "_", base_name, ".rds"))
-      )
+      withProgress(message = 'Saving contact data',
+                   detail = 'please wait ...', value = 1, {
+                     base_name <- sub("\\d+-\\d+-\\d+_(\\w+).rds|.bin|.txt*", "\\1",input$mapFile, 
+                                      ignore.case = TRUE)
+                     
+                     saveRDS(rv$contact_data2, 
+                             file.path(rv$projDir, paste0(Sys.Date(), "_", base_name, ".rds"))
+                     )
+                   })
     })
   })
   
@@ -834,15 +838,15 @@ server <- function(input, output, session) {
     
     if(input$dir2 == "Forward"){
       rv$subseq2 <- rv$interseq_link_counts[rname %in% leading_seq & 
-                                        (!mrnm %in% leading_seq) & 
-                                        link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
+                                              (!mrnm %in% leading_seq) & 
+                                              link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), 
           .(Subsequent_seq = mrnm, Length = mrnm_len, Strand = mrnm_strand, link_no, link_density)]
     } else {
       rv$subseq2 <- rv$interseq_link_counts[mrnm %in% leading_seq & 
-                                        (!rname %in% leading_seq) & 
-                                        link_density <= maxLinkDen & 
-                                        rlen >= minSeqLen,] %>%
+                                              (!rname %in% leading_seq) & 
+                                              link_density <= maxLinkDen & 
+                                              rlen >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), 
           .(Subsequent_seq = rname, Length = mrnm_len, Strand = rname_strand, link_no, link_density)] 
     }
@@ -1146,15 +1150,15 @@ server <- function(input, output, session) {
     
     out_dir <- file.path(rv$projDir,"groups")
     dir.create(out_dir, showWarnings = FALSE)
-
+    
     rv$new_scaffold <- data.table(rname = sub("^[-+]","", input$joined_seqs),
-                               rc = ifelse(grepl("^\\+", input$joined_seqs), 0, 1)) %>%
+                                  rc = ifelse(grepl("^\\+", input$joined_seqs), 0, 1)) %>%
       .[rv$seq_len, on = "rname", nomatch=0] %>%
       .[, ':='(start = ifelse(grepl("fragment", rname), as.numeric(gsub(".*_(\\d+):.*", "\\1", rname)), 0),
-          end = ifelse(grepl("fragment", rname), as.numeric(gsub(".*:(\\d+)", "\\1", rname)), rlen),
-          contig = sub("_fragment.*", "", rname),
-          id = seq_len(.N),
-          name = "")] %>%
+               end = ifelse(grepl("fragment", rname), as.numeric(gsub(".*:(\\d+)", "\\1", rname)), rlen),
+               contig = sub("_fragment.*", "", rname),
+               id = seq_len(.N),
+               name = "")] %>%
       .[, .(name, contig, fragment = rname, id, rc, start, end)]
     
     # Get next group number
@@ -1200,7 +1204,7 @@ server <- function(input, output, session) {
   #-----------------------------------------------------------------------------
   #-----------------------------------------------------------------------------
   # plot hi-c map for whole sequence
-
+  
   observeEvent(input$combineMaps,{
     withBusyIndicatorServer("combineMaps",{
       withProgress(message = 'Preparing contact data', value = 1, 
