@@ -368,13 +368,13 @@ server <- function(input, output, session) {
                        edge_slc <- input$edgeSize2
                        updateSliderInput(session, "edgeSize3", 
                                          value = input$edgeSize2, 
-                                         step = rv$binsize_ini , max = 500000)
+                                         step = rv$binsize_ini , max = 1000000)
                      } else {
                        shinyjs::hide("IntConfig1")
                        edge_slc <- input$edgeSize4
                        updateSliderInput(session, "edgeSize1", 
                                          value = input$edgeSize4, 
-                                         step = rv$binsize_ini , max = 500000)
+                                         step = rv$binsize_ini , max = 1000000)
                      }
                      
                      rv$interseq_link_counts <-  rv$seq_len[rv$contact_data2[rname != mrnm,], on = c("rname")] %>%

@@ -47,7 +47,7 @@ shinyUI(
                                        pickerInput("lnkFile", NULL, choices = NULL , multiple = FALSE,
                                                    options = list(style = "btn-default btn-md btn-picker", size = 20, 
                                                                   `live-search` = TRUE,  tickIcon = "glyphicon-ok", 
-                                                                  width = "100%",showTick = TRUE)
+                                                                  width = "100%", showTick = TRUE)
                                        ),
                                        div(style = "margin-top: 0px;",
                                            withBusyIndicatorUI(
@@ -209,8 +209,8 @@ shinyUI(
                                        tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 0px; margin-left: -5px;}"))
                                      ),
-                                     fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
-                                              div(id = "VwJointMap", style = "font-size: 12px; font-family: Tahoma; float: left;",
+                                     fluidRow(id = "VwJointMap", style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
+                                              div(style = "font-size: 12px; font-family: Tahoma; float: left;",
                                                   fluidRow(style = "margin: 2px 5px 0 5px; background: #ece9df; padding: 1px; border: 1px solid #F4F4F4; height: 37px; border-radius: 5px;",
                                                            div("Number of sequences to plot from the leading end:", style = "width: 300px; float: left; padding: 7px;"),
                                                            div(style = "width: calc(100% - 300px); float: left;",
@@ -235,11 +235,11 @@ shinyUI(
                                               div(style = "width: calc(100% - 84vh); float: left; margin-left: -3px;",
                                                   div(style = "border-left: 1px solid #E8E8E8; border-radius: 3px;",
                                                       div(
-                                                        actionButton("dddd", "Assembly Stats",icon = icon("stats"), width = "200px"),
+                                                        actionButton("dddd", "Assembly Stats",icon = icon("stats", lib = "glyphicon"), width = "200px"),
                                                         tags$style(HTML("#dddd{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: 0px;}"))
                                                       ),
-                                                      fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; ",
+                                                      fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",
                                                                DTOutput("Subsequent")
                                                       ),
                                                       div(
