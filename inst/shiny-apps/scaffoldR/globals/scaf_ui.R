@@ -239,8 +239,8 @@ shinyUI(
                                                         tags$style(HTML("#dddd{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: 0px;}"))
                                                       ),
-                                                      fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",
-                                                               DTOutput("Subsequent")
+                                                      fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;"
+                                                               
                                                       ),
                                                       div(
                                                         actionButton("vwLnkData", "Contact Data",icon = icon("table"), width = "200px"),
@@ -248,8 +248,8 @@ shinyUI(
                                                padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: 0px;}"))
                                                       )
                                                   ),
-                                                  fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;"
-                                                           
+                                                  fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",
+                                                           DTOutput("Subsequent")
                                                   )
                                               )
                                      ),

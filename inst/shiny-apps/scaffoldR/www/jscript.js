@@ -76,6 +76,9 @@ $('#vwJointMap2').click(function(){
   $('#VwJointMap2').slideToggle();
 });
 
+$('#vwLnkData').click(function(){
+  $('#VwLnkData').slideToggle();
+});
 
 $('#intConfig2').click(function(){
   $('#IntConfig2').slideToggle();
