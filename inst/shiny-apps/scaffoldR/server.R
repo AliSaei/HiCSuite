@@ -820,7 +820,7 @@ server <- function(input, output, session) {
     shiny::validate(need(rv$interseq_link_counts, ""))
     shiny::validate(need(input$nrSeq, ""))
     
-    len <- length(isolate(input$joined_seqs))
+    len <- length(isolate(input$anchored_seqs))
     seq2 <- input$seq2
     leading_seq <- seq2[length(seq2)]
     leadingSeq_len <-  max(rv$contact_data2[rname == leading_seq, pos])
@@ -856,9 +856,10 @@ server <- function(input, output, session) {
   observe({
     shiny::validate(need(rv$subseq2, ""))
     
-    chr <- gsub("^[-+]", "", c(input$joined_seqs, input$scaf_man))
-    rv$subseq2.1 <- rv$subseq2[(!(Subsequent_seq %in% chr)), ]
-    rv$choices2 <- c(unique(rv$subseq2.1$Subsequent_seq), chr)
+    used_seqs <- gsub("^[-+]", "", c(input$anchored_seqs, base::strsplit(input$excluded_seqs, "\n")[[1]]))
+    
+    rv$subseq2.1 <- rv$subseq2[(!(Subsequent_seq %in% used_seqs)), ]
+    rv$choices2 <- unique(rv$subseq2.1$Subsequent_seq)
     
     updatePickerInput(session, "subseq2", choices =  rv$choices2,
                       choicesOpt = list(
@@ -872,7 +873,7 @@ server <- function(input, output, session) {
   ##----------------------------------------------------------------------------
   ##----------------------------------------------------------------------------
   output$Subsequent <- DT::renderDT({
-    datatable(rv$subseq2,
+    datatable(rv$subseq2.1,
               rownames = FALSE, class = 'display compact row-border', 
               selection = 'single', filter = 'bottom',
               options = list(
@@ -926,7 +927,7 @@ server <- function(input, output, session) {
       strand_2 <- ifelse(input$strand_2, "+", "-")
       strand_3 <- ifelse(input$strand_3, "+", "-")
       rv$s2.1 <- paste0(strand_3, input$subseq2)
-      chr <- isolate(input$joined_seqs)
+      chr <- isolate(input$anchored_seqs)
       direction <- isolate(input$dir2)
       
       if(input$nrSeq == 1 | is.null(chr)){
@@ -1064,7 +1065,7 @@ server <- function(input, output, session) {
       
       direction <- input$dir2
       
-      if(length(input$joined_seqs) == 0){
+      if(length(input$anchored_seqs) == 0){
         if (direction == 'Backward'){
           rv$chr <- c( rv$s2.1, rv$s1)
         } else {
@@ -1072,13 +1073,13 @@ server <- function(input, output, session) {
         }
       } else {
         if (direction == 'Backward'){
-          rv$chr <- c(rv$s2.1, input$joined_seqs)
+          rv$chr <- c(rv$s2.1, input$anchored_seqs)
         } else {
-          rv$chr <-  c(input$joined_seqs, rv$s2.1)
+          rv$chr <-  c(input$anchored_seqs, rv$s2.1)
         }
       }
       
-      updateCheckboxGroupInput(session, "joined_seqs", NULL, 
+      updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
                                choices = unique(rv$chr), selected = unique(rv$chr))
       updateTextAreaInput(session, "scaf_edit", NULL, 
                           value = paste(unique(rv$chr), collapse = "\n"))
@@ -1086,7 +1087,7 @@ server <- function(input, output, session) {
   })
   
   observe({
-    chr <- input$joined_seqs
+    chr <- input$anchored_seqs
     
     if(length(chr) > 1){
       disable("seq2"); disable_switch = TRUE;
@@ -1108,17 +1109,32 @@ server <- function(input, output, session) {
   })
   
   ##----------------------------------------------------------------------------
+  ## exclude sequences ---------------------------------------------------------
+  
+  observeEvent(input$excludeSeq,{
+    withBusyIndicatorServer("excludeSeq", {
+      
+      seq_list <- c(base::strsplit(input$excluded_seqs, "\n")[[1]], input$subseq2)
+  
+      strsplit("Super-Scaffold_102\nSuper-Scaffold_366", "\n")[[1]]
+      
+      updateTextAreaInput(session, "excluded_seqs", NULL, 
+                          value = paste(unique(seq_list), collapse = "\n"))
+  })
+  })
+  
+  ##----------------------------------------------------------------------------
   ##----------------------------------------------------------------------------
   ## Copy to clipboard
   observeEvent(input$clipbtn, {
-    clipr::write_clip(input$joined_seqs, 
+    clipr::write_clip(input$anchored_seqs, 
                       allow_non_interactive = TRUE)
   })
   
   ## Erase the list 
   observeEvent(input$erase,{ 
-    choices =  input$joined_seqs
-    updateCheckboxGroupInput(session, "joined_seqs", NULL, 
+    choices =  input$anchored_seqs
+    updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
                              choices =  choices[1], 
                              selected =  choices[1])
   })
@@ -1134,7 +1150,7 @@ server <- function(input, output, session) {
   observeEvent(input$check,{ 
     
     choices = base::strsplit(input$scaf_edit, "\n")[[1]]
-    updateCheckboxGroupInput(session, "joined_seqs", NULL, 
+    updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
                              choices =  choices, 
                              selected =  choices)
     
@@ -1146,13 +1162,13 @@ server <- function(input, output, session) {
   
   ## output groups to build fasta file using CreateScaffoldFasta.pl script
   observeEvent(input$export,{
-    shiny::validate(need(input$joined_seqs, ""))
+    shiny::validate(need(input$anchored_seqs, ""))
     
     out_dir <- file.path(rv$projDir,"groups")
     dir.create(out_dir, showWarnings = FALSE)
     
-    rv$new_scaffold <- data.table(rname = sub("^[-+]","", input$joined_seqs),
-                                  rc = ifelse(grepl("^\\+", input$joined_seqs), 0, 1)) %>%
+    rv$new_scaffold <- data.table(rname = sub("^[-+]","", input$anchored_seqs),
+                                  rc = ifelse(grepl("^\\+", input$anchored_seqs), 0, 1)) %>%
       .[rv$seq_len, on = "rname", nomatch=0] %>%
       .[, ':='(start = ifelse(grepl("fragment", rname), as.numeric(gsub(".*_(\\d+):.*", "\\1", rname)), 0),
                end = ifelse(grepl("fragment", rname), as.numeric(gsub(".*:(\\d+)", "\\1", rname)), rlen),
@@ -1209,8 +1225,8 @@ server <- function(input, output, session) {
     withBusyIndicatorServer("combineMaps",{
       withProgress(message = 'Preparing contact data', value = 1, 
                    detail = "please be patient ...", {
-                     #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$joined_seqs}
-                     maps <- input$joined_seqs
+                     #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$anchored_seqs}
+                     maps <- input$anchored_seqs
                      
                      rv$combined_maps <- join_maps_plus(mat = rv$contact_data2, 
                                                         seq = maps, direction = "Forward", 
