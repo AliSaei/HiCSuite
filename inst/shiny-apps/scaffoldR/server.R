@@ -856,9 +856,9 @@ server <- function(input, output, session) {
   observe({
     shiny::validate(need(rv$subseq2, ""))
     
-    chr <- gsub("^[-+]", "", c(input$joined_seqs, input$scaf_man))
-    rv$subseq2.1 <- rv$subseq2[(!(Subsequent_seq %in% chr)), ]
-    rv$choices2 <- c(unique(rv$subseq2.1$Subsequent_seq), chr)
+    used_seqs <- gsub("^[-+]", "", c(input$joined_seqs, input$excluded_seqs))
+    rv$subseq2.1 <- rv$subseq2[(!(Subsequent_seq %in% used_seqs)), ]
+    rv$choices2 <- c(unique(rv$subseq2.1$Subsequent_seq), used_seqs)
     
     updatePickerInput(session, "subseq2", choices =  rv$choices2,
                       choicesOpt = list(
@@ -1105,6 +1105,20 @@ server <- function(input, output, session) {
                                     value = substr(leading_seq, 1, 1) == "+", 
                                     disabled = disable_switch)
     updateNumericInput(session, "n", value = 1)
+  })
+  
+  ##----------------------------------------------------------------------------
+  ## exclude sequences ---------------------------------------------------------
+  
+  observeEvent(input$excludeSeq,{
+    withBusyIndicatorServer("excludeSeq", {
+      
+      seq_list <- c(base::strsplit(input$excluded_seqs, "\n")[[1]], input$subseq2)
+  
+      
+      updateTextAreaInput(session, "excluded_seqs", NULL, 
+                          value = paste(unique(seq_list), collapse = "\n"))
+  })
   })
   
   ##----------------------------------------------------------------------------

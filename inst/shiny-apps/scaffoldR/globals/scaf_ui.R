@@ -95,7 +95,7 @@ shinyUI(
                                    ),
                                    fluidRow(style = "margin: 0px;", 
                                             div(style = "float: left; width: calc(100% - 70px); margin-top: -1px;",
-                                                pickerInput("subseq2", "Subsequence:", choices = NULL, width = '100%',
+                                                pickerInput("subseq2", "Subsequenct Seq:", choices = NULL, width = '100%',
                                                             options = list(style = "btn-default btn-md btn-picker", size = 10, `live-search` = TRUE)
                                                 ),
                                                 div(style = "margin-top: -15px;",
@@ -111,7 +111,7 @@ shinyUI(
                                                            style = "material-circle",  color = "default", size = "xs")
                                             )
                                    ),
-                                   p("Subsequence Filters:", style = "font-weight: 550;"),
+                                   p("Filters:", style = "font-weight: 550;"),
                                    fluidRow(style = "margin: -5px 0 0 0; border: 1px solid #E8E8E8; padding:2px; border-radius: 3px; background: #E8E8E8;", 
                                             div(style = "margin: 0;",
                                                 sliderInput("maxLinkDen", NULL, value = 1, min = 0, max = 1, 
@@ -128,6 +128,10 @@ shinyUI(
                                        withBusyIndicatorUI(
                                          actionButton("add", "Add to scaffold", class = "btn-action", 
                                                       icon = icon("add", lib = "glyphicon"))
+                                       ),
+                                       withBusyIndicatorUI(
+                                         actionButton("excludeSeq", "Exclude Sequence", class = "btn-action", 
+                                                      icon = icon("remove", lib = "glyphicon"))
                                        )
                                    )
                                  )
@@ -199,6 +203,13 @@ shinyUI(
                                        actionButton("combineMaps", "Plot intra-scaffold map", width = '100%')
                                      ),
                                      tags$style(HTML("#combineMaps{font-size: 12px; font-family: Tahoma; font-weight: 550;}"))
+                                 ),
+                                 div(
+                                   withBusyIndicatorUI(
+                                   textAreaInput("excluded_seqs", label = NULL, value = "", 
+                                                 placeholder = "please enter one id per line", 
+                                                 width = '100%', height = '100%', resize = "vertical")
+                                   )
                                  )
                                  
                              ),
@@ -243,12 +254,12 @@ shinyUI(
                                                                
                                                       ),
                                                       div(
-                                                        actionButton("vwLnkData", "Contact Data",icon = icon("table"), width = "200px"),
+                                                        actionButton("vwLnkData", "Contact Data", icon = icon("table"), width = "200px"),
                                                         tags$style(HTML("#vwLnkData{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: 0px;}"))
                                                       )
                                                   ),
-                                                  fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",
+                                                  fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px;",
                                                            DTOutput("Subsequent")
                                                   )
                                               )
