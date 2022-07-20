@@ -138,10 +138,10 @@ shinyUI(
                 ),
                 fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
                          div(id = "DataView", style = "margin: 0px; display: none;",  
-                             div(style = "width: 300px; float: left; background: #ece9df; border: 1px solid #E8E8E8; border-radius: 3px; padding: 5px; margin: 0 2px 0 10px;",
+                             div(style = "width: 400px; float: left; background: #ece9df; border: 1px solid #E8E8E8; border-radius: 3px; padding: 5px; margin: 0 2px 0 10px;",
                                  DT::DTOutput('seqLen')
                              ),
-                             div(style = "width: calc(100% - 330px); float: left;",
+                             div(style = "width: calc(100% - 430px); float: left;",
                                  div(style = "border-left: 1px solid #E8E8E8; border-radius: 3px;",
                                      div(
                                        actionButton("vwStats", "Assembly Stats",icon = icon("stats"), width = "200px"),

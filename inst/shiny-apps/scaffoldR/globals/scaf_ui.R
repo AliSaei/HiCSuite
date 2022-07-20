@@ -179,13 +179,13 @@ shinyUI(
                                           ),
                                           
                                           div(style = "width: calc(100% - 35px); float: left; padding: 2px;",
-                                              div(id = "CheckBox", style = "border: 1px solid #F4F4F4; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: white; margin-right: 2px;",
+                                              div(id = "CheckBox", style = "border: 1px solid #F4F4F4; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: white; margin-right: 2px; resize: vertical; overflow: auto;",
                                                   checkboxGroupInput("anchored_seqs", "Scaffold:", choices = NULL)
                                               ),
                                               hidden(
                                                 div(id = "EditBox" , style = "margin-top: 0px;",
                                                     textAreaInput("scaf_edit", label = NULL, value = "", 
-                                                                  placeholder = "please enter one id per line", 
+                                                                  placeholder = "Please enter one id per line", 
                                                                   width = '100%', height = '100%', resize = "vertical")
                                                 )
                                               )
@@ -195,7 +195,7 @@ shinyUI(
                                    condition = "input.inputType == 'Manual'",
                                    div(style = "margin-top: -15px;",
                                        textAreaInput("scaf_man", label = NULL, value = "", 
-                                                     placeholder = "please enter one id per line", 
+                                                     placeholder = "Please enter one id per line", 
                                                      width = '100%', height = "300px", resize = "vertical")
                                    )
                                  ),
@@ -228,8 +228,8 @@ shinyUI(
                                                            div(style = "width: calc(100% - 500px); float: left;",
                                                                numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1, width = '100%')
                                                            ),
-                                                           div(style = "float: left;",
-                                                             actionButton("refresh", NULL, icon = icon('refresh', lib = "glyphicon"), width = '150px')
+                                                           div(style = "float: right; ",
+                                                             actionButton("refresh", NULL, icon = icon('refresh', lib = "glyphicon"), width = '198px')
                                                              ),
                                                   ),
                                                   div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 5px 5px 5px 5px; font-size: 12px;",

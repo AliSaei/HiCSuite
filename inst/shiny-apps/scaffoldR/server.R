@@ -452,6 +452,8 @@ server <- function(input, output, session) {
   })
   
   output$interactionCounts <- DT::renderDataTable({
+    shiny::validate(need(rv$interseq_link_counts,""))
+    
     DT::datatable(rv$interseq_link_counts[link_no > 10,],
                   escape = FALSE, filter = 'bottom', rownames= FALSE, 
                   class = 'nowrap display compact order-column cell-border stripe', 
