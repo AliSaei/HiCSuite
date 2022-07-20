@@ -834,8 +834,7 @@ server <- function(input, output, session) {
     minSeqLen <- input$minSeqLen * 1000000
     rv$nr_seq <- isolate(input$nrSeq)
     
-    print("A")
-    
+
     if(len > 1 & rv$nr_seq > 1){
       if(leadingSeq_len < 20 * rv$binsize){
         leading_seq <- gsub("^[-+]", "",rv$s1)
