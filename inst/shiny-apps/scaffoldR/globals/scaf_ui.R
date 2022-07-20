@@ -225,9 +225,12 @@ shinyUI(
                                               div(style = "font-size: 12px; font-family: Tahoma; float: left;",
                                                   fluidRow(style = "margin: 2px 5px 0 5px; background: #ece9df; padding: 1px; border: 1px solid #F4F4F4; height: 37px; border-radius: 5px;",
                                                            div("Number of sequences to plot from the leading end:", style = "width: 300px; float: left; padding: 7px;"),
-                                                           div(style = "width: calc(100% - 300px); float: left;",
+                                                           div(style = "width: calc(100% - 500px); float: left;",
                                                                numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1, width = '100%')
-                                                           )
+                                                           ),
+                                                           div(style = "float: left;",
+                                                             actionButton("refresh", NULL, icon = icon('refresh', lib = "glyphicon"), width = '150px')
+                                                             ),
                                                   ),
                                                   div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 5px 5px 5px 5px; font-size: 12px;",
                                                       div(

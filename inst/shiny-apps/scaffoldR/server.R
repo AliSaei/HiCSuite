@@ -445,6 +445,8 @@ server <- function(input, output, session) {
                                   "must be present in the file"))
                      
                      rv$interseq_link_counts <- interseq_link_counts
+                     shinyjs::hide("IntConfig1", anim = TRUE)
+                     shinyjs::hide("IntConfig2", anim = TRUE)
                    })
     })
   })
@@ -798,7 +800,7 @@ server <- function(input, output, session) {
   })
   
   
-  ###--------save changes to disk------------ 
+  ###--------save changes to disk with new name -------------------------------- 
   observeEvent(input$svChanges, {
     withBusyIndicatorServer("svChanges", {
       withProgress(message = 'Saving contact data',
@@ -818,17 +820,23 @@ server <- function(input, output, session) {
   observe({
     shiny::validate(need(input$seq2, ""))
     shiny::validate(need(rv$interseq_link_counts, ""))
-    shiny::validate(need(input$nrSeq, ""))
+    #shiny::validate(need(input$nrSeq > 0, ""))
     
+    ## react when refresh button is pressed 
+    input$refresh
+    
+    ##--------------------------------------------------------------------------
     len <- length(isolate(input$anchored_seqs))
     seq2 <- input$seq2
     leading_seq <- seq2[length(seq2)]
     leadingSeq_len <-  max(rv$contact_data2[rname == leading_seq, pos])
     maxLinkDen <- input$maxLinkDen
     minSeqLen <- input$minSeqLen * 1000000
+    rv$nr_seq <- isolate(input$nrSeq)
     
+    print("A")
     
-    if(len > 1 & input$nrSeq > 1){
+    if(len > 1 & rv$nr_seq > 1){
       if(leadingSeq_len < 20 * rv$binsize){
         leading_seq <- gsub("^[-+]", "",rv$s1)
       } else {
@@ -850,7 +858,6 @@ server <- function(input, output, session) {
         .[order(link_density, link_no, avg, decreasing = TRUE), 
           .(Subsequent_seq = rname, Length = mrnm_len, Strand = rname_strand, link_no, link_density)] 
     }
-    
   })
   
   observe({
@@ -921,7 +928,7 @@ server <- function(input, output, session) {
   scaffold_map <- reactive({
     shiny::validate(need(input$subseq2, ""))
     shiny::validate(need(input$seq2, ""))
-    shiny::validate(need(input$nrSeq, ""))
+    shiny::validate(need(rv$nr_seq > 0, ""))
     
     withBusyIndicatorServer("add", {
       strand_2 <- ifelse(input$strand_2, "+", "-")
@@ -930,11 +937,11 @@ server <- function(input, output, session) {
       chr <- isolate(input$anchored_seqs)
       direction <- isolate(input$dir2)
       
-      if(input$nrSeq == 1 | is.null(chr)){
+      if(rv$nr_seq == 1 | is.null(chr)){
         rv$s1 <- paste0(strand_2, input$seq2)
       } else {
         len <- length(chr)
-        nrSeq <- min(len, input$nrSeq)
+        nrSeq <- min(len, rv$nr_seq)
         
         if(len == 1){
           rv$s1 <- paste0(strand_2, input$seq2)
