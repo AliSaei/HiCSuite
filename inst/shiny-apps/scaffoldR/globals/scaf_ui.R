@@ -179,7 +179,7 @@ shinyUI(
                                           ),
                                           
                                           div(style = "width: calc(100% - 35px); float: left; padding: 2px;",
-                                              div(id = "CheckBox", style = "border: 1px solid #F4F4F4; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: #E8E8E8; margin-right: 2px;",
+                                              div(id = "CheckBox", style = "border: 1px solid #F4F4F4; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: white; margin-right: 2px;",
                                                   checkboxGroupInput("anchored_seqs", "Scaffold:", choices = NULL)
                                               ),
                                               hidden(
