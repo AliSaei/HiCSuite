@@ -1158,7 +1158,7 @@ server <- function(input, output, session) {
   observeEvent(input$check,{ 
     
     choices = base::strsplit(input$scaf_edit, "\n")[[1]]
-    choises = trimws(choises[choises != ""])
+    choices = trimws(choices[choices != ""])
 
     updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
                              choices =  choices, 
