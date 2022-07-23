@@ -149,7 +149,7 @@ server <- function(input, output, session) {
   
   ##----------------------------------------------------------------------------
   ##----------------------------------------------------------------------------
-  # Bin Size
+  ## Update Bin Size -----------------------------------------------------------
   observe({
     updateSliderInput(session, "binsize", value = input$binsize2, 
                       step = rv$binsize_ini , max = input$binsize2)
@@ -183,6 +183,9 @@ server <- function(input, output, session) {
     })
   })
   
+  ## ---------------------------------------------------------------------------
+  
+  ## Output contig length to the browser ---------------------------------------
   output$seqLen <- DT::renderDT({
     shiny::validate(need(rv$seq_len, ""))
     
@@ -200,15 +203,9 @@ server <- function(input, output, session) {
               )
     )
   })
+  ## ---------------------------------------------------------------------------
   
-  # output$lenHist <- renderPlot({
-  #   shiny::validate(need(rv$seq_len, ""))
-  #   
-  #   ggplot(rv$seq_len, aes(x = rlen)) + 
-  #     geom_histogram(breaks=seq(1, max(rv$seq_len$rlen), by = 10000),
-  #                    fill = "blue", alpha = 0.2)
-  # })
-  
+  ## Output contact data to the browser ---------------------------------------
   output$contactData <- DT::renderDT({
     shiny::validate(need(rv$seq_len, ""))
     
@@ -230,10 +227,10 @@ server <- function(input, output, session) {
       )
     )
   })
+  ## ---------------------------------------------------------------------------
   
   
-  
-  ## sequence length histogram
+  ## Contig length histogram -------------------------------------------------
   output$lenHist <- renderPlot({
     shiny::validate(need(rv$seq_len, ""))
     
@@ -247,9 +244,9 @@ server <- function(input, output, session) {
                  color="red",  size=1) 
   })
   
-  ##------------------------------------------------------------------------------------------------------------
-  ##------------------------------------------------------------------------------------------------------------  
-  # capture click events on intra-map view
+  ##----------------------------------------------------------------------------
+  
+  ## capture click events on intra-contig map view -------------------------------------
   observe({
     shiny::validate(need(rv$contact_data2, ""))
     if(is.null(input$intramap_dblclick)) 
@@ -263,9 +260,9 @@ server <- function(input, output, session) {
     updateRadioGroupButtons(session, 'action', selected = "Cut")
     updateNumericInput(session, "cutPos", value = xy_str(input$intramap_dblclick))
   })
-  
   ##----------------------------------------------------------------------------
-  # capture brush event
+  
+  ## capture brush event -------------------------------------------------------
   observe({
     shiny::validate(need(rv$binsize > 0, ""))
     
@@ -285,6 +282,7 @@ server <- function(input, output, session) {
   observe(rv$cut_pos <- input$cutPos)
   
   ##----------------------------------------------------------------------------
+  
   ##------------------- cut sequence--------------------------------------------
   observeEvent(input$cut1 + input$cut2,{
     shiny::validate(need(input$cutPos > 0, ""))
@@ -294,28 +292,44 @@ server <- function(input, output, session) {
                    detail = 'please wait ...', value = 1,{
                      
                      tgt_contig <- input$seq
-                     tgt_len <- rv$seq_len[rname == tgt_contig, rlen]
-                     frag_start <- rv$cut_pos + rv$binsize
+                     
+                     if(grepl("_fragment_\\d+:", tgt_contig)){
+                       frag1_start <- as.numeric(sub(".*_fragment_(\\d+):\\d+", "\\1", tgt_contig, perl = TRUE))
+                       frag1_end <- frag1_start + rv$cut_pos
+                       frag2_start <- frag1_start + rv$cut_pos + rv$binsize
+                       frag2_end <- as.numeric(sub(".*_fragment_\\d+:", "", tgt_contig))
+                     } else {
+                       frag1_start <- 0
+                       frag1_end <- rv$cut_pos
+                       frag2_start <- rv$cut_pos + rv$binsize
+                       frag2_end <- rv$seq_len[rname == tgt_contig, rlen]
+                     }
+                     
                      
                      if(input$frag2Name == "Default"){
-                       frag2_name <- paste0(tgt_contig, "_fragment_", frag_start, ":", tgt_len)
+                       contig_name <- sub("_fragment_\\d+:\\d+", "", tgt_contig)
+                       frag1_name <- paste0(contig_name, "_fragment_", frag1_start, ":", frag1_end)
+                       frag2_name <- paste0(contig_name, "_fragment_", frag2_start, ":", frag2_end)
                      } else {
+                       frag1_name <- input$frag1Name
                        frag2_name <- input$frag2Name
                      }
                      
                      
                      rv$tgt_contig_data <- rv$contact_data2 %>%
                        .[(rname == tgt_contig | mrnm == tgt_contig),] %>%
-                       .[,':='(rname = ifelse(rname == tgt_contig & pos >  rv$cut_pos , frag2_name, rname),
-                               mrnm = ifelse(mrnm == tgt_contig & mpos >  rv$cut_pos , frag2_name, mrnm))] %>%
-                       .[, ':='(pos = ifelse(rname == frag2_name,  pos - frag_start, pos ),
-                                mpos = ifelse(mrnm == frag2_name , mpos - frag_start , mpos))]
+                       .[,':='(rname = ifelse(rname == tgt_contig & pos >  rv$cut_pos, frag2_name, 
+                                              ifelse(rname == tgt_contig & pos <=  rv$cut_pos, frag1_name, rname)),
+                               mrnm = ifelse(mrnm == tgt_contig & mpos >  rv$cut_pos , frag2_name, 
+                                             ifelse(mrnm == tgt_contig & mpos <=  rv$cut_pos, frag1_name, mrnm)))] %>%
+                       .[, ':='(pos = ifelse(rname == frag2_name,  pos - (rv$cut_pos + rv$binsize), pos ),
+                                mpos = ifelse(mrnm == frag2_name , mpos - (rv$cut_pos + rv$binsize) , mpos))]
                      
                      rv$contact_data2 <- rv$contact_data2 %>%
                        .[(rname != tgt_contig & mrnm != tgt_contig),] %>%
                        rbind(., rv$tgt_contig_data)
                      
-                     ## Get new sequence length
+                     ## Get new sequence length---------------------------------
                      rv$seq_len <- rv$contact_data2[,.(rlen = max(pos)), by = .(rname)] %>%
                        .[order(rname),]
                      
@@ -329,14 +343,19 @@ server <- function(input, output, session) {
                                          rep_len("font-size: 12px; line-height: 1.5; 
                                        margin-left: -10px; border-bottom: 1px solid gray;", 
                                                  length(rv$choices)), "background-color: lightgray;")))
+                     
                      ## Set plot size to default
                      rv$intramap_range <- NULL
+                     
                      ## Set break position to 0
                      updateNumericInput(session, "cutPos", value = 0)
+                     
+                     ## Update the seq dropdown with fragment name 
+                     updatePickerInput(session, "seq", selected = frag1_name)
                    })
     })
   })
-  
+  ## -----------------------------------------------------------------------------  
   
   observe({
     updateSliderInput(session, "edgeSize2", value = input$edgeSize1, 
@@ -353,6 +372,7 @@ server <- function(input, output, session) {
   observeEvent(input$calcIntraction1 + input$calcIntraction2, {
     shiny::validate(need(rv$contact_data2, ""))
     
+    ## figure out which button is pressed --------------------------------------
     btn_id <- c("calcIntraction1" , "calcIntraction2")
     btn_val <- c(input$calcIntraction1, input$calcIntraction2) - rv$btn_val2 
     i <- which(btn_val == max(btn_val))
@@ -395,6 +415,7 @@ server <- function(input, output, session) {
                             link_no, sum, avg = sum/link_no), 
                          by = .(rname, mrnm, rname_strand, mrnm_strand, rlen, mrnm_len)]
                      
+                     ## UI updates ---------------------------------------------
                      #bin_rname =(link_no/ceiling(min(edge_rname,edge_mrnm)/rv$binsize))/10
                      rv$choices <- unique(rv$interseq_link_counts$rname)
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
@@ -416,7 +437,7 @@ server <- function(input, output, session) {
                      updateNumericInput(session, "edgeSize3", min = rv$binsize, value = edge_slc, 
                                         step = rv$binsize , max = 500000)
                      
-                     #set plot size to default
+                     #3 set plot size back to default
                      rv$edge_slc <- edge_slc
                      shinyjs::hide("IntConfig1", anim = TRUE)
                      shinyjs::hide("IntConfig2", anim = TRUE)
@@ -836,7 +857,7 @@ server <- function(input, output, session) {
     minSeqLen <- input$minSeqLen * 1000000
     rv$nr_seq <- isolate(input$nrSeq)
     
-
+    
     if(len > 1 & rv$nr_seq > 1){
       if(leadingSeq_len < 20 * rv$binsize){
         leading_seq <- gsub("^[-+]", "",rv$s1)
@@ -1123,12 +1144,12 @@ server <- function(input, output, session) {
     withBusyIndicatorServer("excludeSeq", {
       
       seq_list <- c(base::strsplit(input$excluded_seqs, "\n")[[1]], input$subseq2)
-  
+      
       strsplit("Super-Scaffold_102\nSuper-Scaffold_366", "\n")[[1]]
       
       updateTextAreaInput(session, "excluded_seqs", NULL, 
                           value = paste(unique(seq_list), collapse = "\n"))
-  })
+    })
   })
   
   ##----------------------------------------------------------------------------
@@ -1141,10 +1162,9 @@ server <- function(input, output, session) {
   
   ## Erase the list 
   observeEvent(input$erase,{ 
-    choices =  input$anchored_seqs
     updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
-                             choices =  choices[1], 
-                             selected =  choices[1])
+                             choices =  "", selected = "")
+    updateTextAreaInput(session, "scaf_edit", value = "")
   })
   
   ## Edit the list manually 
@@ -1155,14 +1175,13 @@ server <- function(input, output, session) {
     shinyjs::show("check")
   })
   
+  ## 
   observeEvent(input$check,{ 
-    
     choices <- base::strsplit(input$scaf_edit, "\n")[[1]]
     choices <- trimws(choices[choices != ""])
-
+    
     updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
-                             choices =  choices, 
-                             selected =  choices)
+                             choices =  choices, selected =  choices)
     
     shinyjs::hide("EditBox")
     shinyjs::show("CheckBox")
@@ -1235,11 +1254,11 @@ server <- function(input, output, session) {
     withBusyIndicatorServer("combineMaps",{
       withProgress(message = 'Preparing contact data', value = 1, 
                    detail = "please be patient ...", {
-                     #maps <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$anchored_seqs}
-                     maps <- input$anchored_seqs
+                     #chr <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$anchored_seqs}
+                     chr <- input$anchored_seqs
                      
                      rv$combined_maps <- join_maps_plus(mat = rv$contact_data2, 
-                                                        seq = maps, direction = "Forward", 
+                                                        seq = chr, direction = "Forward", 
                                                         binsize = isolate(rv$binsize))
                      
                      #fwrite(chr, paste0("./","chr",chr_no,"_",n, ".csv"), row.names = FALSE)
