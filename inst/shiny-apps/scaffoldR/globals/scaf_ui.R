@@ -95,7 +95,7 @@ shinyUI(
                                    ),
                                    fluidRow(style = "margin: 0px;", 
                                             div(style = "float: left; width: calc(100% - 70px); margin-top: -1px;",
-                                                pickerInput("subseq2", "Subsequenct Seq:", choices = NULL, width = '100%',
+                                                pickerInput("subseq2", "Subsequent Seq:", choices = NULL, width = '100%',
                                                             options = list(style = "btn-default btn-md btn-picker", size = 10, `live-search` = TRUE)
                                                 ),
                                                 div(style = "margin-top: -15px;",
