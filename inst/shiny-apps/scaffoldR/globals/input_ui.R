@@ -268,6 +268,7 @@ shinyUI(
                                                     condition = "input.action == 'Cut'",
                                                     numericInput("cutPos", "Break position (bp):", value = 0, 
                                                                  min = 0, max = 50000000, step= 100),
+                                                    textInput("frag1Name", "First fragmnet name:", value = "Default",  width = '100%'),
                                                     textInput("frag2Name", "Second fragmnet name:", value = "Default",  width = '100%'),
                                                     withBusyIndicatorUI(
                                                       actionButton("cut1", "Break Sequence", class = "btn-action", 
@@ -279,7 +280,7 @@ shinyUI(
                                    )
                                  ),
                                  conditionalPanel(
-                                   condition = "input.join | input.cut1 | input.cut ",
+                                   condition = "input.join | input.cut1 | input.cut2 ",
                                    withBusyIndicatorUI(
                                      actionButton("svChanges", "Save changes to disk", width = '100%', class = "dbutt", 
                                                   icon = icon("floppy-disk", lib = "glyphicon")
