@@ -878,7 +878,7 @@ server <- function(input, output, session) {
                                               link_density <= maxLinkDen & 
                                               rlen >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), 
-          .(Subsequent_seq = rname, Length = mrnm_len, Strand = rname_strand, link_no, link_density)] 
+          .(Subsequent_seq = rname, Length = rlen, Strand = rname_strand, link_no, link_density)] 
     }
   })
   
