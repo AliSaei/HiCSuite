@@ -441,6 +441,7 @@ server <- function(input, output, session) {
                      rv$edge_slc <- edge_slc
                      shinyjs::hide("IntConfig1", anim = TRUE)
                      shinyjs::hide("IntConfig2", anim = TRUE)
+                     shinyjs::show("ScafConfig", anim = TRUE)
                    })
     })
   })
@@ -1154,17 +1155,17 @@ server <- function(input, output, session) {
   
   ##----------------------------------------------------------------------------
   ##----------------------------------------------------------------------------
-  ## Copy to clipboard
-  observeEvent(input$clipbtn, {
-    clipr::write_clip(input$anchored_seqs, 
-                      allow_non_interactive = TRUE)
-  })
-  
   ## Erase the list 
   observeEvent(input$erase,{ 
     updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
                              choices =  "", selected = "")
     updateTextAreaInput(session, "scaf_edit", value = "")
+  })
+  
+  ## Copy to clipboard
+  observeEvent(input$clipbtn, {
+    clipr::write_clip(input$anchored_seqs, 
+                      allow_non_interactive = TRUE)
   })
   
   ## Edit the list manually 
@@ -1175,7 +1176,7 @@ server <- function(input, output, session) {
     shinyjs::show("check")
   })
   
-  ## 
+  ## confirm the edits
   observeEvent(input$check,{ 
     choices <- base::strsplit(input$scaf_edit, "\n")[[1]]
     choices <- trimws(choices[choices != ""])
@@ -1189,6 +1190,18 @@ server <- function(input, output, session) {
     shinyjs::hide("check")
   })
   
+  ## reverse the scaffold 
+  observeEvent(input$reverse,{ 
+    #choices <- base::rev(chartr("+-", "-+", input$anchored_seqs))
+    choices <- input$anchored_seqs
+    choices <- base::rev(ifelse(grepl("^-", choices), 
+                                sub("^-", "+", choices), sub("^\\+", "-", choices)))
+    
+    updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
+                             choices =  choices, selected =  choices)
+  })
+  
+  ## ---------------------------------------------------------------------------
   ## output groups to build fasta file using CreateScaffoldFasta.pl script
   observeEvent(input$export,{
     shiny::validate(need(input$anchored_seqs, ""))

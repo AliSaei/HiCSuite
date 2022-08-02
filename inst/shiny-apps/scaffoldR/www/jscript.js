@@ -108,6 +108,7 @@ $("#export").attr('title', 'Save to data directory');
 $("#edit").attr('title', 'Edit');
 $("#clipbtn").attr('title', 'Copy to clipboard');
 $("#erase").attr('title', 'Clear list');
+$("#reverse").attr('title', 'Reverse scaffold');
 $("#check").attr('title', 'Ok');
 });
 

@@ -174,12 +174,14 @@ shinyUI(
                                                          style = "material-circle", size = "xs"),
                                               actionBttn("clipbtn", NULL, icon = icon('copy', lib = "glyphicon"), 
                                                          style = "material-circle", size = "xs"),
+                                              actionBttn("reverse", NULL, icon = icon('sort-by-alphabet-alt', lib = "glyphicon"), 
+                                                         style = "material-circle", size = "xs"),
                                               actionBttn("export", NULL, icon = icon('save', lib = "glyphicon"), 
                                                          style = "material-circle", size = "xs")
                                           ),
                                           
                                           div(style = "width: calc(100% - 35px); float: left; padding: 2px;",
-                                              div(id = "CheckBox", style = "border: 1px solid #F4F4F4; padding: 5px; border-radius: 3px; min-height: 110px; max-height: 450px; overflow: auto; background: white; margin-right: 2px; resize: vertical; overflow: auto;",
+                                              div(id = "CheckBox", style = "border: 1px solid #F4F4F4; padding: 5px; border-radius: 3px; min-height: 150px; max-height: 550px; overflow: auto; background: white; margin-right: 2px; resize: vertical; overflow: auto;",
                                                   checkboxGroupInput("anchored_seqs", "Scaffold:", choices = NULL)
                                               ),
                                               hidden(
