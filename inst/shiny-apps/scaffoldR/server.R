@@ -196,6 +196,7 @@ server <- function(input, output, session) {
                 pageLength = 15, dom = 'lti', autoWidth = TRUE,
                 lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
                 scrollY = "400px",
+                scrollX = TRUE,
                 initComplete = JS(
                   "function(settings, json) {",
                   "$(this.api().table().header()).css({'background-color': 'lightgray', 'color': '#000'});",
@@ -1290,7 +1291,7 @@ server <- function(input, output, session) {
     ggplot(rv$combined_maps, 
            aes(x = pos, y = mpos, fill=log10(n/2))) +
       geom_tile(color = "red", size = 0.1) +
-      labs(title = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
+      labs(title = input$titleMap2, subtitle = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
       scale_x_continuous(expand=c(0,0)) +
       scale_y_continuous(expand=c(0,0)) +
       #geom_vline(xintercept = len$len	, color = "gray", size = 0.2) +

@@ -127,11 +127,11 @@ shinyUI(
                                    div(style = "margin-top: 10px;",
                                        withBusyIndicatorUI(
                                          actionButton("add", "Add to scaffold", class = "btn-action", 
-                                                      icon = icon("add", lib = "glyphicon"))
+                                                      icon = icon("plus", lib = "font-awesome"))
                                        ),
                                        withBusyIndicatorUI(
                                          actionButton("excludeSeq", "Exclude Sequence", class = "btn-action", 
-                                                      icon = icon("remove", lib = "glyphicon"))
+                                                      icon = icon("xmark"))
                                        )
                                    )
                                  )
@@ -201,9 +201,10 @@ shinyUI(
                                                      width = '100%', height = "300px", resize = "vertical")
                                    )
                                  ),
+                                 textInput("tileMap2",label = "Scaffold name:", value = "", width = '100%'),
                                  div(style = "margin-bottom: 20px;",
                                      withBusyIndicatorUI(
-                                       actionButton("combineMaps", "Plot intra-scaffold map", width = '100%')
+                                       actionButton("combineMaps", "Plot whole scaffold map", width = '100%')
                                      ),
                                      tags$style(HTML("#combineMaps{font-size: 12px; font-family: Tahoma; font-weight: 550;}"))
                                  ),
