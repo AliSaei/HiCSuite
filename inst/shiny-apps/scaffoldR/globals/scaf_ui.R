@@ -253,11 +253,11 @@ shinyUI(
                                               div(style = "width: calc(100% - 84vh); float: left; margin-left: -3px;",
                                                   div(style = "border-left: 1px solid #E8E8E8; border-radius: 3px;",
                                                       div(
-                                                        actionButton("dddd", "Assembly Stats",icon = icon("stats", lib = "glyphicon"), width = "200px"),
+                                                        actionButton("vwStats2", "Assembly Stats",icon = icon("stats", lib = "glyphicon"), width = "200px"),
                                                         tags$style(HTML("#dddd{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: 0px;}"))
                                                       ),
-                                                      fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;"
+                                                      fluidRow(id = "VwStats2",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;"
                                                                
                                                       ),
                                                       div(

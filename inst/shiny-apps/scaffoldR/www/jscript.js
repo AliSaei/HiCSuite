@@ -34,7 +34,22 @@ $('#vwStats').click(function(){
   $('#VwStats').slideToggle();
 });
 
+$('#vwLnkData').click(function(){
+   $('#VwStats').slideUp();
+  $('#VwLnkData').slideToggle();
+  
+});
 
+$('#vwStats2').click(function(){
+  $('#VwLnkData2').slideUp();
+  $('#VwStats2').slideToggle();
+});
+
+$('#VwLnkData2').click(function(){
+   $('#VwStats2').slideUp();
+  $('#VwLnkData2').slideToggle();
+  
+});
 
 $('#intConfig1').click(function(){
   $('#IntConfig1').slideToggle();
