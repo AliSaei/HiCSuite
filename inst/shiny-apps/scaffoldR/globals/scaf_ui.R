@@ -201,7 +201,7 @@ shinyUI(
                                                      width = '100%', height = "300px", resize = "vertical")
                                    )
                                  ),
-                                 textInput("tileMap2",label = "Scaffold name:", value = "", width = '100%'),
+                                 textInput("titleMap2",label = "Scaffold name:", value = "", width = '100%'),
                                  div(style = "margin-bottom: 20px;",
                                      withBusyIndicatorUI(
                                        actionButton("combineMaps", "Plot whole scaffold map", width = '100%')
