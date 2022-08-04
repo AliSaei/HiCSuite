@@ -21,11 +21,10 @@ source("./globals/helpers.R")
 #  file = paste0(out_dir, i,".ordering")
 #  write.table(data, file, row.names = FALSE, col.names = FALSE, quote = FALSE) 
 #}
-
 server <- function(input, output, session) {
   shinyOptions(progress.style = "old")
   rv <- reactiveValues(chr = NULL, s2.1 = NULL, cut_pos = 0, 
-                       intramap_range = NULL,  btn_val2 = c(0,0))
+                       intramap_range = NULL,  btn_val2 = c(0,0), btn_val3 = c(0,0))
   
   ## shiny files set up
   volumes <- c(Home = fs::path_home(), getVolumes()(), `Test Data Directory` = "../../../")
@@ -155,8 +154,8 @@ server <- function(input, output, session) {
                       step = rv$binsize_ini , max = input$binsize2)
   })
   
-  observeEvent(input$update_bin, {
-    withBusyIndicatorServer("update_bin", {
+  observeEvent(input$updateBinning, {
+    withBusyIndicatorServer("updateBinning", {
       withProgress(message = 'Binning in progress',
                    detail = 'please wait ...', value = 1, {
                      rv$binsize <- input$binsize
@@ -824,10 +823,20 @@ server <- function(input, output, session) {
     })
   })
   
+  observe(print(input$last_btn))
   
   ###--------save changes to disk with new name -------------------------------- 
-  observeEvent(input$svChanges, {
-    withBusyIndicatorServer("svChanges", {
+  observeEvent(input$saveBinData1 + input$saveBinData2, {
+    
+    ## figure out which button is pressed --------------------------------------
+    btn_id <- c("saveBinData1" , "saveBinData2")
+    btn_val <- c(input$saveBinData1, input$saveBinData2) - rv$btn_val3 
+    i <- which(btn_val == max(btn_val))
+    rv$btn_val3 <- btn_val
+    
+    
+    withBusyIndicatorServer(btn_id[i], {
+
       withProgress(message = 'Saving contact data',
                    detail = 'please wait ...', value = 1, {
                      base_name <- sub("\\d+-\\d+-\\d+_(\\w+).rds|.bin|.txt*", "\\1",input$mapFile, 

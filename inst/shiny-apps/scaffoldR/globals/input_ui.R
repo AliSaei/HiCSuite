@@ -75,9 +75,17 @@ shinyUI(
                                      ),
                                      div(style = "margin-top: -30px;",
                                          withBusyIndicatorUI(
-                                           actionButton("update_bin", "Update", class = "btn-update",
+                                           actionButton("updateBinning", "Update", class = "btn-update",
                                                         icon = icon('play', lib = "glyphicon"))
                                          )
+                                     ),
+                                     conditionalPanel(
+                                       condition = "input.updateBinning",
+                                       withBusyIndicatorUI(
+                                         actionButton("saveBinData1", "Save changes to disk", width = '100%', class = "dbutt", 
+                                                      icon = icon("floppy-disk", lib = "glyphicon")
+                                         )
+                                       )
                                      )
                                  )
                              )
@@ -282,11 +290,10 @@ shinyUI(
                                  conditionalPanel(
                                    condition = "input.join | input.cut1 | input.cut2 ",
                                    withBusyIndicatorUI(
-                                     actionButton("svChanges", "Save changes to disk", width = '100%', class = "dbutt", 
+                                     actionButton("saveBinData2", "Save changes to disk", width = '100%', class = "dbutt", 
                                                   icon = icon("floppy-disk", lib = "glyphicon")
                                      )
-                                   ), 
-                                   tags$head(tags$style(".dbutt{width: 100%; background: #E8E8E8 !important; font-size: 12px; margin-top: 2px;}"))
+                                   )
                                  )
                              ),
                              div(style = "width: calc(100% - 270px); float: left;",

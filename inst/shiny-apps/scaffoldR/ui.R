@@ -36,7 +36,7 @@ shinyUI(
                  )
                )
       ),
-      
+
       ## javascript
       tags$script(src="jscript.js"),
       
@@ -102,6 +102,7 @@ shinyUI(
                                                     overflow: auto;
                             }
                             #.progress-bar {color: transparent !important}
+                            .dbutt{width: 100%; background: #E8E8E8 !important; font-size: 12px; margin-top: 2px;}
 
       "))),
       
@@ -117,6 +118,5 @@ shinyUI(
         dimension[1] = window.innerHeight;
         Shiny.onInputChange("dimension", dimension);
       });
-      ')
-    )
+      ')    )
   ))
