@@ -34,11 +34,7 @@ $('#vwStats').click(function(){
   $('#VwStats').slideToggle();
 });
 
-$('#vwLnkData').click(function(){
-   $('#VwStats').slideUp();
-  $('#VwLnkData').slideToggle();
-  
-});
+
 
 $('#intConfig1').click(function(){
   $('#IntConfig1').slideToggle();

@@ -261,12 +261,12 @@ shinyUI(
                                                                
                                                       ),
                                                       div(
-                                                        actionButton("vwLnkData", "Contact Data", icon = icon("table"), width = "200px"),
-                                                        tags$style(HTML("#vwLnkData{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                                        actionButton("vwLnkData2", "Contact Data", icon = icon("table"), width = "200px"),
+                                                        tags$style(HTML("#vwLnkData2{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
                                                padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: 0px;}"))
                                                       )
                                                   ),
-                                                  fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px;",
+                                                  fluidRow(id = "VwLnkData2",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px;",
                                                            DTOutput("Subsequent")
                                                   )
                                               )
