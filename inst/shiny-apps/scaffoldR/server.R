@@ -193,7 +193,7 @@ server <- function(input, output, session) {
               selection = 'single', filter = 'bottom', colnames = c("Sequence", "Length"), 
               options = list(
                 pageLength = 15, dom = 'lti', autoWidth = TRUE,
-                lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
+                lengthMenu = list(c(5, 15, 25, -1), c('5', '15', '25', 'All')),
                 scrollY = "400px",
                 scrollX = TRUE,
                 initComplete = JS(
