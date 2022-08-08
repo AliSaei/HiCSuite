@@ -1188,7 +1188,7 @@ server <- function(input, output, session) {
     shinyjs::show("EditBox")
     hide("CheckBox")
     hide("edit")
-    shinyjs::show("check")
+    shinyjs::show("confirm")
   })
   
   ## confirm the edits
@@ -1203,7 +1203,7 @@ server <- function(input, output, session) {
     shinyjs::hide("EditBox")
     shinyjs::show("CheckBox")
     shinyjs::show("edit")
-    shinyjs::hide("check")
+    shinyjs::hide("confirm")
   })
   
   ## reverse the scaffold 
@@ -1307,7 +1307,8 @@ server <- function(input, output, session) {
     
     ggplot(rv$combined_maps, 
            aes(x = pos, y = mpos, fill=log10(n/2))) +
-      geom_tile(color = "red", size = 0.1) +
+      geom_tile() +
+      scale_fill_gradient(low = "white", high = "red") +
       labs(title = isolate(input$titleMap2), 
            subtitle = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
       scale_x_continuous(expand=c(0,0)) +
