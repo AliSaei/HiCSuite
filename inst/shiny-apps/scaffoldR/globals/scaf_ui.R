@@ -167,7 +167,7 @@ shinyUI(
                                               actionBttn("edit", NULL, icon = icon('edit', lib = "glyphicon"), 
                                                          style = "material-circle", size = "xs"),
                                               shinyjs::hidden(
-                                                actionBttn("check", NULL, icon = icon('check', lib = "glyphicon"), 
+                                                actionBttn("confirm", NULL, icon = icon('check', lib = "glyphicon"), 
                                                            style = "material-circle", size = "xs")
                                               ),
                                               actionBttn("erase", NULL, icon = icon('erase', lib = "glyphicon"), 
@@ -210,15 +210,15 @@ shinyUI(
                                  ),
                                  div(
                                    withBusyIndicatorUI(
-                                   textAreaInput("excluded_seqs", label = "Excluded sequences:", value = "", 
-                                                 placeholder = "please enter one id per line", 
-                                                 width = '100%', height = '50px', resize = "vertical")
+                                     textAreaInput("excluded_seqs", label = "Excluded sequences:", value = "", 
+                                                   placeholder = "please enter one id per line", 
+                                                   width = '100%', height = '50px', resize = "vertical")
                                    )
                                  )
                                  
                              ),
                              div(style = "margin-left: 5px; float: left; width: calc(100% - 320px);",  
-                                 div(style = "border-left: 1px solid #E8E8E8;",
+                                 div(style = "border-left: 3px solid #E8E8E8;",
                                      div(
                                        actionButton("vwJointMap", "Scaffolding Map",icon = icon("table"), width = "200px"),
                                        tags$style(HTML("#vwJointMap{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
@@ -232,8 +232,8 @@ shinyUI(
                                                                numericInput("nrSeq", NULL, value = 1, min = 1, max = 10, step= 1, width = '100%')
                                                            ),
                                                            div(style = "float: right; ",
-                                                             actionButton("refresh", NULL, icon = icon('refresh', lib = "glyphicon"), width = '198px')
-                                                             ),
+                                                               actionButton("refresh", NULL, icon = icon('refresh', lib = "glyphicon"), width = '198px')
+                                                           ),
                                                   ),
                                                   div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 5px 5px 5px 5px; font-size: 12px;",
                                                       div(
@@ -250,12 +250,12 @@ shinyUI(
                                                       )
                                                   )
                                               ),
-                                              div(style = "width: calc(100% - 84vh); float: left; margin-left: -3px;",
-                                                  div(style = "border-left: 1px solid #E8E8E8; border-radius: 3px;",
+                                              div(style = "width: calc(100% - 84vh); float: left; margin-left: 5px;",
+                                                  div(style = "border-left: 3px solid #E8E8E8;",
                                                       div(
-                                                        actionButton("vwStats2", "Assembly Stats",icon = icon("stats", lib = "glyphicon"), width = "200px"),
-                                                        tags$style(HTML("#dddd{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
-                                               padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: 0px;}"))
+                                                        actionButton("vwStats2", "Stats",icon = icon("stats", lib = "glyphicon"), width = "200px"),
+                                                        tags$style(HTML("#vwStats2{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
+                                                                                padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: -5px;}"))
                                                       ),
                                                       fluidRow(id = "VwStats2",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;"
                                                                
@@ -263,7 +263,7 @@ shinyUI(
                                                       div(
                                                         actionButton("vwLnkData2", "Contact Data", icon = icon("table"), width = "200px"),
                                                         tags$style(HTML("#vwLnkData2{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
-                                               padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: 0px;}"))
+                                                                                      padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
                                                       )
                                                   ),
                                                   fluidRow(id = "VwLnkData2",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px;",

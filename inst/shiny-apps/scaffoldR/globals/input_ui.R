@@ -28,7 +28,7 @@ shinyUI(
                                            pickerInput("mapFile", NULL, choices = NULL , multiple = FALSE,
                                                        options = list(style = "btn-default btn-md btn-picker", size = 20, 
                                                                       `live-search` = TRUE,  tickIcon = "glyphicon-ok", 
-                                                                      width = "100%",showTick = TRUE)
+                                                                      width = "100%", showTick = TRUE)
                                            )
                                        )
                                      )
@@ -146,15 +146,15 @@ shinyUI(
                 ),
                 fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
                          div(id = "DataView", style = "margin: 0px; display: none;",  
-                             div(style = "width: 550px; float: left; background: #ece9df; border: 1px solid #E8E8E8; border-radius: 3px; padding: 5px; margin: 0 2px 0 10px;",
+                             div(style = "width: 450px; float: left; background: #ece9df; border: 1px solid #E8E8E8; border-radius: 3px; padding: 5px; margin: 0 2px 0 10px;",
                                  DT::DTOutput('seqLen')
                              ),
-                             div(style = "width: calc(100% - 580px); float: left;",
-                                 div(style = "border-left: 1px solid #E8E8E8; border-radius: 3px;",
+                             div(style = "width: calc(100% - 580px); float: left; margin-left: 5px;",
+                                 div(style = "border-left: 3px solid #E8E8E8; border-radius: 3px;",
                                      div(
-                                       actionButton("vwStats", "Assembly Stats",icon = icon("stats"), width = "200px"),
+                                       actionButton("vwStats", "Stats",icon = icon("stats", lib = "glyphicon"), width = "200px"),
                                        tags$style(HTML("#vwStats{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
-                                               padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: 0px;}"))
+                                               padding-bottom: 5px; font-weight: 550; margin-top: 0; margin-left: -5px;}"))
                                      ),
                                      fluidRow(id = "VwStats",  style = "margin: 1px 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",
                                               plotOutput("lenHist", width = "500px")
@@ -163,7 +163,7 @@ shinyUI(
                                      div(
                                        actionButton("vwLnkData", "Contact Data",icon = icon("table"), width = "200px"),
                                        tags$style(HTML("#vwLnkData{font-size: 12px; background-color: #ece9df; border-top-right-radius: 30px; padding-top: 5px; border: 1px solid #E8E8E8;
-                                               padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: 0px;}"))
+                                               padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
                                      )
                                  ),
                                  fluidRow(id = "VwLnkData",  style = "padding: 5px; margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 3px; display: none;",

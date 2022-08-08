@@ -196,6 +196,7 @@ server <- function(input, output, session) {
                 lengthMenu = list(c(5, 15, 25, -1), c('5', '15', '25', 'All')),
                 scrollY = "400px",
                 scrollX = TRUE,
+                autoWidth= TRUE,
                 initComplete = JS(
                   "function(settings, json) {",
                   "$(this.api().table().header()).css({'background-color': 'lightgray', 'color': '#000'});",
@@ -219,7 +220,8 @@ server <- function(input, output, session) {
       rv$contact_data2[rname == seq_selected | mrnm == seq_selected,],
       rownames = FALSE, class = 'display compact cell-border', filter = 'bottom',
       options = list(
-        pageLength = 15, dom = 'lti', autoWidth = TRUE,
+        pageLength = 15, dom = 'ltip', 
+        autoWidth = TRUE,
         initComplete = JS(
           "function(settings, json) {",
           "$(this.api().table().header()).css({'background-color': '#F0F0F0', 'color': '#000'});",
@@ -279,8 +281,7 @@ server <- function(input, output, session) {
     rv$intramap_range <- xy_range_str(input$intramap_brush)
   })
   
-  observe(rv$cut_pos <- input$cutPos)
-  
+
   ##----------------------------------------------------------------------------
   
   ##------------------- cut sequence--------------------------------------------
@@ -291,17 +292,18 @@ server <- function(input, output, session) {
       withProgress(message = 'Cutting the sequence',
                    detail = 'please wait ...', value = 1,{
                      
+                     cut_pos <- input$cutPos
                      tgt_contig <- input$seq
                      
                      if(grepl("_fragment_\\d+:", tgt_contig)){
                        frag1_start <- as.numeric(sub(".*_fragment_(\\d+):\\d+", "\\1", tgt_contig, perl = TRUE))
-                       frag1_end <- frag1_start + rv$cut_pos
-                       frag2_start <- frag1_start + rv$cut_pos + rv$binsize
+                       frag1_end <- frag1_start + cut_pos
+                       frag2_start <- frag1_start + cut_pos + rv$binsize
                        frag2_end <- as.numeric(sub(".*_fragment_\\d+:", "", tgt_contig))
                      } else {
                        frag1_start <- 0
-                       frag1_end <- rv$cut_pos
-                       frag2_start <- rv$cut_pos + rv$binsize
+                       frag1_end <- cut_pos
+                       frag2_start <- cut_pos + rv$binsize
                        frag2_end <- rv$seq_len[rname == tgt_contig, rlen]
                      }
                      
@@ -318,12 +320,12 @@ server <- function(input, output, session) {
                      
                      rv$tgt_contig_data <- rv$contact_data2 %>%
                        .[(rname == tgt_contig | mrnm == tgt_contig),] %>%
-                       .[,':='(rname = ifelse(rname == tgt_contig & pos >  rv$cut_pos, frag2_name, 
-                                              ifelse(rname == tgt_contig & pos <=  rv$cut_pos, frag1_name, rname)),
-                               mrnm = ifelse(mrnm == tgt_contig & mpos >  rv$cut_pos , frag2_name, 
-                                             ifelse(mrnm == tgt_contig & mpos <=  rv$cut_pos, frag1_name, mrnm)))] %>%
-                       .[, ':='(pos = ifelse(rname == frag2_name,  pos - (rv$cut_pos + rv$binsize), pos ),
-                                mpos = ifelse(mrnm == frag2_name , mpos - (rv$cut_pos + rv$binsize) , mpos))]
+                       .[,':='(rname = ifelse(rname == tgt_contig & pos >  cut_pos, frag2_name, 
+                                              ifelse(rname == tgt_contig & pos <=  cut_pos, frag1_name, rname)),
+                               mrnm = ifelse(mrnm == tgt_contig & mpos >  cut_pos , frag2_name, 
+                                             ifelse(mrnm == tgt_contig & mpos <=  cut_pos, frag1_name, mrnm)))] %>%
+                       .[, ':='(pos = ifelse(rname == frag2_name,  pos - (cut_pos + rv$binsize), pos ),
+                                mpos = ifelse(mrnm == frag2_name , mpos - (cut_pos + rv$binsize) , mpos))]
                      
                      rv$contact_data2 <- rv$contact_data2 %>%
                        .[(rname != tgt_contig & mrnm != tgt_contig),] %>%
@@ -333,8 +335,8 @@ server <- function(input, output, session) {
                      rv$seq_len <- rv$contact_data2[,.(rlen = max(pos)), by = .(rname)] %>%
                        .[order(rname),]
                      
-                     #rv$seq_len <- rv$seq_len[rname == tgt_contig, rlen := rv$cut_pos] %>%
-                     #  rbind(.,list(frag2_name, tgt_len - rv$cut_pos)) %>%
+                     #rv$seq_len <- rv$seq_len[rname == tgt_contig, rlen := cut_pos] %>%
+                     #  rbind(.,list(frag2_name, tgt_len - cut_pos)) %>%
                      #  .[order(-rlen),]
                      
                      rv$choices <- rv$seq_len[["rname"]]
@@ -514,7 +516,10 @@ server <- function(input, output, session) {
     withBusyIndicatorServer("svInteractionCounts", {
       withProgress(message = 'Saving link data',
                    detail = 'please wait ...', value = 1, {
-                     file_name <- paste(Sys.Date(), '-interseq_link_counts-',rv$edge_slc, '.rds', sep='')
+                     base_name <- sub("\\d+-\\d+-\\d+_(\\w+).rds|.bin|.txt*", "\\1",input$mapFile, 
+                                      ignore.case = TRUE)
+                     
+                     file_name <- paste0(Sys.Date(),"_", base_name, '_linkCounts_',rv$edge_slc, '.rds')
                      
                      saveRDS(rv$interseq_link_counts, 
                              file.path(rv$projDir, file_name)
@@ -631,7 +636,7 @@ server <- function(input, output, session) {
   observeEvent(input$clearBrush1, {
     session$resetBrush("intramap_brush")
     
-    if(rv$cut_pos > 0){
+    if(input$cut_pos > 0){
       updateNumericInput(session, "cutPos", value = 0)
     }
   })
@@ -662,8 +667,6 @@ server <- function(input, output, session) {
                            panel.border = element_rect(colour = "gray", fill = NA),
                            panel.background = element_rect(fill = "white", colour = "white"))
                    
-                   #updateNumericInput(session, "cutPos", value = 0)
-                   # rv$cut_pos <- 0
                    rv$intramap_range <- NULL
                    rv$intramap_plot <- p
                  })
@@ -683,9 +686,10 @@ server <- function(input, output, session) {
       p <- rv$intramap_plot 
     }
     
-    if(rv$cut_pos > 0){
-      p + geom_vline(xintercept = rv$cut_pos, color = "blue", size = 0.3) +
-        geom_hline(yintercept = rv$cut_pos, color = "blue", size = 0.3)
+    cut_pos <- input$cutPos
+    if(cut_pos > 0){
+      p + geom_vline(xintercept = cut_pos, color = "blue", size = 0.3) +
+        geom_hline(yintercept = cut_pos, color = "blue", size = 0.3)
     } else {
       p
     }
@@ -921,6 +925,7 @@ server <- function(input, output, session) {
                 lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
                 ScrollY = "500px",
                 scrollX = TRUE,
+                autoWidth= TRUE,
                 initComplete = JS(
                   "function(settings, json) {",
                   "$(this.api().table().header()).css({'background-color': '#F0F0F0', 'color': '#000'});",
@@ -1187,12 +1192,13 @@ server <- function(input, output, session) {
   })
   
   ## confirm the edits
-  observeEvent(input$check,{ 
+  observeEvent(input$confirm,{ 
     choices <- base::strsplit(input$scaf_edit, "\n")[[1]]
     choices <- trimws(choices[choices != ""])
     
     updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
                              choices =  choices, selected =  choices)
+   
     
     shinyjs::hide("EditBox")
     shinyjs::show("CheckBox")
@@ -1209,6 +1215,8 @@ server <- function(input, output, session) {
     
     updateCheckboxGroupInput(session, "anchored_seqs", NULL, 
                              choices =  choices, selected =  choices)
+    updateTextAreaInput(session, "scaf_edit", 
+                        value = paste(unique(choices), collapse = "\n"))
   })
   
   ## ---------------------------------------------------------------------------
@@ -1271,7 +1279,7 @@ server <- function(input, output, session) {
   
   #-----------------------------------------------------------------------------
   #-----------------------------------------------------------------------------
-  # plot hi-c map for whole sequence
+  # plot hi-c map for whole scaffold or genome
   
   observeEvent(input$combineMaps,{
     withBusyIndicatorServer("combineMaps",{
@@ -1300,7 +1308,8 @@ server <- function(input, output, session) {
     ggplot(rv$combined_maps, 
            aes(x = pos, y = mpos, fill=log10(n/2))) +
       geom_tile(color = "red", size = 0.1) +
-      labs(title = input$titleMap2, subtitle = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
+      labs(title = isolate(input$titleMap2), 
+           subtitle = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
       scale_x_continuous(expand=c(0,0)) +
       scale_y_continuous(expand=c(0,0)) +
       #geom_vline(xintercept = len$len	, color = "gray", size = 0.2) +

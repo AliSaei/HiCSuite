@@ -60,21 +60,21 @@ shinyUI(
                            .btn-action{font-size: 12px; font-family: Tahoma; width: 100%; font-weight: 550; background-color: green; color: white;}
                            .btn-update{font-size: 12px; font-family:Tahoma; width: 100%; font-weight: 550; background-color: #ece9df;}
                            .btn-dir{font-size: 12px; font-family:Tahoma; width: 100%; background-color: #F8F8F8;}
-                           .btn-picker{font-size: 12px; font-family:Tahoma; background-color: #F8F8F8;}
+                           .btn-picker{font-size: 12px; font-family: Tahoma; background-color: #F8F8F8; z-index: 100;}
                            .btn-accordion{font-size: 12px; font-family:Tahoma; font-weight: 550; width: 100%; height: 30px; background-color: #E8E8E8;}
                            .btn-drop{font-size: 12px; font-family:Tahoma; font-weight: 550; width: 100%; height: 30px; background-color: #E8E8E8; text-align: left;}
                            .selectize-input { font-size: 12px; font-family: Tahoma;}
                            .selectize-dropdown { font-size: 12px; font-family: Tahoma; overflow-x: auto;}
                            .selectize-dropdown-content {max-height: 300px; padding: 0; }
                            .selectize-dropdown-content .option {border-bottom: 1px solid #ccc;}
+                           .selectize-dropdown-content .active {background: #2196f3 !important;}
                            .fa {font-size: 14px;}
                            .glyph-icon {font-size: 12px;}
-                           #map2_tooltip {position: absolute; pointer-events: none; width: 300px; z-index: 100; padding: 0;}
                            .slide-btn{font-size: 12px; background-color: #ece9df; 
-                            border-top-right-radius: 30px; border: 1px solid #E8E8E8; 
-                            padding-top: 5px; padding-bottom: 5px; font-weight: 550; 
-                            margin-top: 5px; margin-left: -5px;}
-                           #table.dataTable {font-size: 12px; position:relative; !important;}
+                              border-top-right-radius: 30px; border: 1px solid #E8E8E8; 
+                              padding-top: 5px; padding-bottom: 5px; font-weight: 550; 
+                              margin-top: 5px; margin-left: -5px;}
+
                             table.dataTable tr.selected td, table.dataTable td.selected {background-color: #C8C8C8 !important;}
                            .skin-black .main-sidebar {background-color: white; position: fixed; width: 115px;}
                            .skin-black .main-sidebar .sidebar .sidebar-menu a {
@@ -101,8 +101,10 @@ shinyUI(
                                                     height: 100vh;
                                                     overflow: auto;
                             }
-                            #.progress-bar {color: transparent !important}
                             .dbutt{width: 100%; background: #E8E8E8 !important; font-size: 12px; margin-top: 2px;}
+                            #map2_tooltip {position: absolute; pointer-events: none; width: 300px; z-index: 100; padding: 0;}
+                            #table.dataTable {font-size: 12px; position:relative; !important;}
+                            #.progress-bar {color: transparent !important}
 
       "))),
       
