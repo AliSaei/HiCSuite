@@ -1305,16 +1305,14 @@ server <- function(input, output, session) {
     len <- rv$combined_maps[, .(len = max(pos)), by = .(rname)] %>%
       .[order(len), ]
     
-    ggplot(rv$combined_maps, 
+    ggplot(rv$combined_maps[rname != mrnm | pos != mpos, ], 
            aes(x = pos, y = mpos, fill=log10(n/2))) +
       geom_tile() +
-      scale_fill_gradient(low = "white", high = "red") +
+       scale_fill_gradient(low = "white", high = "red") +
       labs(title = isolate(input$titleMap2), 
            subtitle = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
       scale_x_continuous(expand=c(0,0)) +
       scale_y_continuous(expand=c(0,0)) +
-      #geom_vline(xintercept = len$len	, color = "gray", size = 0.2) +
-      #geom_hline(yintercept = len$len	, color = "gray", size = 0.2) +
       theme(axis.text = element_blank(),
             axis.ticks = element_blank(), 
             legend.position = "none",
