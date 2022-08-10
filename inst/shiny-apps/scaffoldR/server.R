@@ -1305,7 +1305,7 @@ server <- function(input, output, session) {
     len <- rv$combined_maps[, .(len = max(pos)), by = .(rname)] %>%
       .[order(len), ]
     
-    ggplot(rv$combined_maps[rname != mrnm | pos != mpos, ], 
+    p <- ggplot(rv$combined_maps[rname != mrnm | pos != mpos, ], 
            aes(x = pos, y = mpos, fill=log10(n/2))) +
       geom_tile() +
        scale_fill_gradient(low = "white", high = "red") +
@@ -1318,6 +1318,11 @@ server <- function(input, output, session) {
             legend.position = "none",
             panel.border = element_rect(colour = "gray", fill = NA),
             panel.background = element_rect(fill = "white", colour = "white"))
+    
+    ggsave(file.path(isolate(rv$projDir), "map2.png"), dpi = 320)
+    
+    p
+    
   }, height = function() {
     if(is.null(input$dimension[2])){
       400
