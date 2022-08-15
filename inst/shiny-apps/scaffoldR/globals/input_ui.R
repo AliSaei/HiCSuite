@@ -174,7 +174,7 @@ shinyUI(
                 ),
                 
                 div(
-                  actionButton("vwIntraMap", " Intra-map view",icon = icon("table"), width = "285px", class = 'slide-btn')
+                  actionButton("vwIntraMap", "Single Map View",icon = icon("table"), width = "285px", class = 'slide-btn')
                 ),
                 fluidRow(style = "margin: 0 0 0px 10px; border: 1px solid #E8E8E8; padding: 1px;",
                          div(id = "IntraMap", style = "height: calc(100% + 160px); display: none; ",
@@ -276,8 +276,8 @@ shinyUI(
                                                     condition = "input.action == 'Cut'",
                                                     numericInput("cutPos", "Break position (bp):", value = 0, 
                                                                  min = 0, max = 50000000, step= 100),
-                                                    textInput("frag1Name", "First fragmnet name:", value = "Default",  width = '100%'),
-                                                    textInput("frag2Name", "Second fragmnet name:", value = "Default",  width = '100%'),
+                                                    textInput("frag1Name", "First fragmnet name:", value = "",  width = '100%'),
+                                                    textInput("frag2Name", "Second fragmnet name:", value = "",  width = '100%'),
                                                     withBusyIndicatorUI(
                                                       actionButton("cut1", "Break Sequence", class = "btn-action", 
                                                                    icon = icon('scissors', lib = "glyphicon"))
@@ -322,6 +322,48 @@ shinyUI(
                                              withLoader(type = "html")
                                        )
                                      )
+                                 )
+                             )
+                         )
+                ),
+                div(
+                  actionButton("vwJointMap2", "Multi Map View",icon = icon("table"), width = "285px", class = 'slide-btn'),
+                ),
+                fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
+                         div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
+                             div(style = "border: 1px solid #E8E8E8; width: 100%; padding: 10px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
+                                 
+                                 textAreaInput("seqList", label = NULL, value = "", 
+                                               placeholder = "Please enter one id per line", 
+                                               width = '100%', height = '100%', resize = "vertical"),
+                                 textInput("titleMap2",label = "Scaffold name:", value = "", width = '100%'),
+                                 div(style = "margin-bottom: 20px;",
+                                     withBusyIndicatorUI(
+                                       actionButton("combineMaps", "Plot whole scaffold map", width = '100%')
+                                     ),
+                                     tags$style(HTML("#combineMaps{font-size: 12px; font-family: Tahoma; font-weight: 550;}"))
+                                 )
+                                 
+                             ),
+                             div(style = "width: calc(100% - 270px); float: left;",
+                                 div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 5px 5px 5px 5px; font-size: 12px;",
+                                     fluidRow( style = "margin: 0;",
+                                               div( style = "float: left;",
+                                                    dropdownButton(
+                                                      
+                                                      
+                                                      circle = TRUE, status = "default", size = "sm",
+                                                      icon = icon("cog", lib = "glyphicon"), width = "300px",
+                                                      
+                                                      tooltip = tooltipOptions(title = "Click to edit plot")
+                                                    )
+                                               )
+                                     ),
+                                     fluidRow(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh;",
+                                              plotOutput("map2", width = "auto", height = "auto", hover = hoverOpts(id = "map2_hover")) %>%
+                                                withLoader(type="html")
+                                     ),
+                                     uiOutput("map2_hoverinfo")
                                  )
                              )
                          )

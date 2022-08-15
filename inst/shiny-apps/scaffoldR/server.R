@@ -382,7 +382,7 @@ server <- function(input, output, session) {
     
     
     withBusyIndicatorServer(btn_id[i], {
-      withProgress(message = 'Calculating links number',
+      withProgress(message = 'Calculating interaction number',
                    detail = 'please wait ...', value = 1, {
                      
                      if(btn_id[i] == "calcIntraction1"){
@@ -399,7 +399,7 @@ server <- function(input, output, session) {
                                          step = rv$binsize_ini , max = 1000000)
                      }
                      
-                     rv$interseq_link_counts <-  rv$seq_len[rv$contact_data2[rname != mrnm,], on = c("rname")] %>%
+                     rv$interaction_counts <-  rv$seq_len[rv$contact_data2[rname != mrnm,], on = c("rname")] %>%
                        .[rv$seq_len, on = c("mrnm" = "rname"), ':='(mrnm_len = i.rlen)] %>%
                        .[((pos < edge_slc | pos > rlen - edge_slc) & (mpos < edge_slc | mpos > mrnm_len - edge_slc)),] %>%
                        .[, ':='(rname_strand = ifelse(pos < edge_slc, "-", 
@@ -419,7 +419,7 @@ server <- function(input, output, session) {
                      
                      ## UI updates ---------------------------------------------
                      #bin_rname =(link_no/ceiling(min(edge_rname,edge_mrnm)/rv$binsize))/10
-                     rv$choices <- unique(rv$interseq_link_counts$rname)
+                     rv$choices <- unique(rv$interaction_counts$rname)
                      choices_opt <- list(style = paste(rep_len("font-size: 12px; line-height: 1.5; margin-left: -10px; 
                                                                border-bottom: 1px solid gray;", length(rv$choices)), 
                                                        "background-color: lightgray;"))
@@ -456,19 +456,19 @@ server <- function(input, output, session) {
                    detail = 'please wait ...', value = 1, {
                      
                      if(grepl(".rds",input$lnkFile, ignore.case = TRUE)){
-                       interseq_link_counts <- readRDS(file.path(rv$projDir, input$lnkFile))
+                       interaction_counts <- readRDS(file.path(rv$projDir, input$lnkFile))
                      } else {
-                       interseq_link_counts <- fread(file.path(rv$projDir,input$lnkFile))
+                       interaction_counts <- fread(file.path(rv$projDir,input$lnkFile))
                      }
                      
                      # These columns are being used for downstream calculations
                      required_cols <- c("rname", "mrnm", "mrnm_strand", "rname_strand", "mrnm_len", "rlen", "link_density")
                      
-                     if(any(required_cols %!in% names(interseq_link_counts)))
+                     if(any(required_cols %!in% names(interaction_counts)))
                        stop(paste("Columns", paste0(required_cols, collapse = ", "), 
                                   "must be present in the file"))
                      
-                     rv$interseq_link_counts <- interseq_link_counts
+                     rv$interaction_counts <- interaction_counts
                      shinyjs::hide("IntConfig1", anim = TRUE)
                      shinyjs::hide("IntConfig2", anim = TRUE)
                    })
@@ -476,9 +476,9 @@ server <- function(input, output, session) {
   })
   
   output$interactionCounts <- DT::renderDataTable({
-    shiny::validate(need(rv$interseq_link_counts,""))
+    shiny::validate(need(rv$interaction_counts,""))
     
-    DT::datatable(rv$interseq_link_counts[link_no > 10,],
+    DT::datatable(rv$interaction_counts[link_no > 10,],
                   escape = FALSE, filter = 'bottom', rownames= FALSE, 
                   class = 'nowrap display compact order-column cell-border stripe', 
                   extensions = c('Buttons', 'ColReorder'), selection = "single",
@@ -505,10 +505,10 @@ server <- function(input, output, session) {
   
   output$interactionCountsExp <- downloadHandler(
     filename = function() {
-      paste(Sys.Date(), '-interseq_link_counts-',rv$edge_slc, '.csv', sep='')
+      paste(Sys.Date(), '-interaction_counts-',rv$edge_slc, '.csv', sep='')
     },
     content = function(con) {
-      fwrite(rv$interseq_link_counts , con, row.names = FALSE)
+      fwrite(rv$interaction_counts , con, row.names = FALSE)
     }
   )
   
@@ -521,7 +521,7 @@ server <- function(input, output, session) {
                      
                      file_name <- paste0(Sys.Date(),"_", base_name, '_linkCounts_',rv$edge_slc, '.rds')
                      
-                     saveRDS(rv$interseq_link_counts, 
+                     saveRDS(rv$interaction_counts, 
                              file.path(rv$projDir, file_name)
                      )
                    })
@@ -531,15 +531,15 @@ server <- function(input, output, session) {
   ##------------------------------------------------------------------------------------------------------------
   observe({
     shiny::validate(need(input$seq1, ""))
-    shiny::validate(need(rv$interseq_link_counts, ""))
+    shiny::validate(need(rv$interaction_counts, ""))
     
     seq <- input$seq1
     
     if(input$dir1 == "Backward"){
-      subseq1 <- rv$interseq_link_counts[mrnm %in% seq & (!rname %in% seq),] %>%
+      subseq1 <- rv$interaction_counts[mrnm %in% seq & (!rname %in% seq),] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequent_seq = rname, Strand = rname_strand)] 
     } else {
-      subseq1 <- rv$interseq_link_counts[rname %in% seq & (!mrnm %in% seq),] %>%
+      subseq1 <- rv$interaction_counts[rname %in% seq & (!mrnm %in% seq),] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), .(Subsequent_seq = mrnm, Strand = mrnm_strand)]
     }
     
@@ -717,7 +717,7 @@ server <- function(input, output, session) {
     shiny::validate(need(input$action == "Join", ""))
     shiny::validate(need(input$seq1, ""))
     shiny::validate(need(input$subseq1, ""))
-    shiny::validate(need(rv$interseq_link_counts, ""))
+    shiny::validate(need(rv$interaction_counts, ""))
     
     strand <- ifelse(input$subseq1_strand, "+", "-")
     subseq = paste0(strand, input$subseq1)
@@ -827,8 +827,7 @@ server <- function(input, output, session) {
     })
   })
   
-  observe(print(input$last_btn))
-  
+
   ###--------save changes to disk with new name -------------------------------- 
   observeEvent(input$saveBinData1 + input$saveBinData2, {
     
@@ -855,9 +854,83 @@ server <- function(input, output, session) {
   
   ##------------------------------------------------------------------------------------------------------------
   ##------------------------------------------------------------------------------------------------------------
+
+  # plot hi-c map for whole scaffold or genome
+  
+  observeEvent(input$combineMaps,{
+    withBusyIndicatorServer("combineMaps",{
+      withProgress(message = 'Preparing contact data', value = 1, 
+                   detail = "please be patient ...", {
+                     #chr <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$anchored_seqs}
+                     #chr <- input$anchored_seqs
+                     chr <- base::strsplit(input$seqList, "\n")[[1]]
+                     
+                     rv$combined_maps <- join_maps_plus(mat = rv$contact_data2, 
+                                                        seq = chr, direction = "Forward", 
+                                                        binsize = isolate(rv$binsize))
+                     
+                     #fwrite(chr, paste0("./","chr",chr_no,"_",n, ".csv"), row.names = FALSE)
+                     #saveRDS(chr, paste0("chr1",chr_no,".rds"))
+                     #chr <- fread(paste0("chr6-", 16,".csv"), stringsAsFactors = FALSE)
+                   })
+    })
+  })
+  
+  output$map2 <- renderPlot({
+    shiny::validate(need(rv$combined_maps, ""))
+    
+    len <- rv$combined_maps[, .(len = max(pos)), by = .(rname)] %>%
+      .[order(len), ]
+    #rv$combined_maps[rname != mrnm | pos != mpos, ], 
+    ggplot(rv$combined_maps, 
+           aes(x = pos, y = mpos, fill=log10(n/2))) +
+      geom_tile() +
+      scale_fill_gradient(low = "white", high = "red") +
+      labs(title = isolate(input$titleMap2), 
+           subtitle = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
+      scale_x_continuous(expand=c(0,0)) +
+      scale_y_continuous(expand=c(0,0)) +
+      theme(axis.text = element_blank(),
+            axis.ticks = element_blank(), 
+            legend.position = "none",
+            panel.border = element_rect(colour = "gray", fill = NA),
+            panel.background = element_rect(fill = "white", colour = "white"))
+    
+    #ggsave(file.path(isolate(rv$projDir), "map2.png"), dpi = 320)
+    
+    
+  }, height = function() {
+    if(is.null(input$dimension[2])){
+      400
+    } else {
+      0.8 * input$dimension[2]
+    }
+  }, width = function() {
+    if(is.null(input$dimension[2])){
+      400
+    } else {
+      0.8 * input$dimension[2]
+    }
+  })
+  
+  output$map2_hoverinfo <- renderTable({
+    shiny::validate(need(rv$combined_maps, ""))
+    
+    res <- nearPoints(rv$combined_maps, input$map2_hover, "pos", "mpos", threshold = 1, maxpoints = 1)
+    
+    if(nrow(res) == 0)
+      return()
+    res
+  })
+  
+  
+  
+  
+  ##------------------------------------------------------------------------------------------------------------
+  ##------------------------------------------------------------------------------------------------------------
   observe({
     shiny::validate(need(input$seq2, ""))
-    shiny::validate(need(rv$interseq_link_counts, ""))
+    shiny::validate(need(rv$interaction_counts, ""))
     #shiny::validate(need(input$nrSeq > 0, ""))
     
     ## react when refresh button is pressed 
@@ -882,13 +955,13 @@ server <- function(input, output, session) {
     }
     
     if(input$dir2 == "Forward"){
-      rv$subseq2 <- rv$interseq_link_counts[rname %in% leading_seq & 
+      rv$subseq2 <- rv$interaction_counts[rname %in% leading_seq & 
                                               (!mrnm %in% leading_seq) & 
                                               link_density <= maxLinkDen &  mrnm_len >= minSeqLen,] %>%
         .[order(link_density, link_no, avg, decreasing = TRUE), 
           .(Subsequent_seq = mrnm, Length = mrnm_len, Strand = mrnm_strand, link_no, link_density)]
     } else {
-      rv$subseq2 <- rv$interseq_link_counts[mrnm %in% leading_seq & 
+      rv$subseq2 <- rv$interaction_counts[mrnm %in% leading_seq & 
                                               (!rname %in% leading_seq) & 
                                               link_density <= maxLinkDen & 
                                               rlen >= minSeqLen,] %>%
@@ -1274,78 +1347,7 @@ server <- function(input, output, session) {
     
     Biostrings::writeXStringSet(hic_scaffolds, "C:/Users/saeia/OneDrive - AgResearch/shared_with_andrew/T.repens_genome/hic_assembly.fasta")
   })
-  
-  
-  
-  #-----------------------------------------------------------------------------
-  #-----------------------------------------------------------------------------
-  # plot hi-c map for whole scaffold or genome
-  
-  observeEvent(input$combineMaps,{
-    withBusyIndicatorServer("combineMaps",{
-      withProgress(message = 'Preparing contact data', value = 1, 
-                   detail = "please be patient ...", {
-                     #chr <- if(input$inputType == "Manual"){base::strsplit(input$scaf_man, "\n")[[1]]} else {input$anchored_seqs}
-                     chr <- input$anchored_seqs
-                     
-                     rv$combined_maps <- join_maps_plus(mat = rv$contact_data2, 
-                                                        seq = chr, direction = "Forward", 
-                                                        binsize = isolate(rv$binsize))
-                     
-                     #fwrite(chr, paste0("./","chr",chr_no,"_",n, ".csv"), row.names = FALSE)
-                     #saveRDS(chr, paste0("chr1",chr_no,".rds"))
-                     #chr <- fread(paste0("chr6-", 16,".csv"), stringsAsFactors = FALSE)
-                   })
-    })
-  })
-  
-  output$map2 <- renderPlot({
-    shiny::validate(need(rv$combined_maps, ""))
-    
-    len <- rv$combined_maps[, .(len = max(pos)), by = .(rname)] %>%
-      .[order(len), ]
-    
-    p <- ggplot(rv$combined_maps[rname != mrnm | pos != mpos, ], 
-           aes(x = pos, y = mpos, fill=log10(n/2))) +
-      geom_tile() +
-       scale_fill_gradient(low = "white", high = "red") +
-      labs(title = isolate(input$titleMap2), 
-           subtitle = paste("Total size:", max(len$len)/1000000, "MB"), x = "", y = "") +
-      scale_x_continuous(expand=c(0,0)) +
-      scale_y_continuous(expand=c(0,0)) +
-      theme(axis.text = element_blank(),
-            axis.ticks = element_blank(), 
-            legend.position = "none",
-            panel.border = element_rect(colour = "gray", fill = NA),
-            panel.background = element_rect(fill = "white", colour = "white"))
-    
-    ggsave(file.path(isolate(rv$projDir), "map2.png"), dpi = 320)
-    
-    p
-    
-  }, height = function() {
-    if(is.null(input$dimension[2])){
-      400
-    } else {
-      0.8 * input$dimension[2]
-    }
-  }, width = function() {
-    if(is.null(input$dimension[2])){
-      400
-    } else {
-      0.8 * input$dimension[2]
-    }
-  })
-  
-  output$map2_hoverinfo <- renderTable({
-    shiny::validate(need(rv$combined_maps, ""))
-    
-    res <- nearPoints(rv$combined_maps, input$map2_hover, "pos", "mpos", threshold = 1, maxpoints = 1)
-    
-    if(nrow(res) == 0)
-      return()
-    res
-  })
+
 }
 
 

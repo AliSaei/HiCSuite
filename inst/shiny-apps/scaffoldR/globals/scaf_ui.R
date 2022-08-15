@@ -201,13 +201,6 @@ shinyUI(
                                                      width = '100%', height = "300px", resize = "vertical")
                                    )
                                  ),
-                                 textInput("titleMap2",label = "Scaffold name:", value = "", width = '100%'),
-                                 div(style = "margin-bottom: 20px;",
-                                     withBusyIndicatorUI(
-                                       actionButton("combineMaps", "Plot whole scaffold map", width = '100%')
-                                     ),
-                                     tags$style(HTML("#combineMaps{font-size: 12px; font-family: Tahoma; font-weight: 550;}"))
-                                 ),
                                  div(
                                    withBusyIndicatorUI(
                                      textAreaInput("excluded_seqs", label = "Excluded sequences:", value = "", 
@@ -272,13 +265,13 @@ shinyUI(
                                               )
                                      ),
                                      div(
-                                       actionButton("vwJointMap2", "Intra-scaffold Map",icon = icon("table"), width = "200px"),
+                                       actionButton("vwJointMap3", "Intra-scaffold Map",icon = icon("table"), width = "200px"),
                                        tags$style(HTML("#vwJointMap2{font-size: 12px; background-color:#ece9df; border-top-right-radius: 30px; padding-top: 5px;  border: 1px solid #E8E8E8;
                                                     padding-bottom: 5px; font-weight: 550; margin-top: 5px; margin-left: -5px;}"))
                                      )
                                  ),
                                  fluidRow(style = "margin: 0 0 0 10px; border: 1px solid #E8E8E8; border-radius: 5px; padding: 1px; font-family: Tahoma; font-size: 12px;",
-                                          div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
+                                          div(id = "VwJointMap3", style ="height: calc(100% + 160px); display: none;",
                                               div(style = "width: calc(100% - 270px); float: left;",
                                                   div(style = "width: 82vh; border: 1px solid #E8E8E8; border-radius: 5px; padding: 10px; background: #ece9df; margin: 5px 5px 5px 5px; font-size: 12px;",
                                                       fluidRow( style = "margin: 0;",
@@ -292,12 +285,12 @@ shinyUI(
                                                                   tooltip = tooltipOptions(title = "Click to edit plot")
                                                                 )
                                                            )
-                                                      ),
-                                                      fluidRow(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh;",
-                                                          plotOutput("map2", width = "auto", height = "auto", hover = hoverOpts(id = "map2_hover")) %>%
-                                                            withLoader(type="html")
-                                                      ),
-                                                      uiOutput("map2_hoverinfo")
+                                                      )
+                                                     # fluidRow(style = "border: 1px solid white; border-radius: 5px; margin: 0px; width: 80vh;"
+                                                        #  plotOutput("map2", width = "auto", height = "auto", hover = hoverOpts(id = "map2_hover")) %>%
+                                                        #    withLoader(type="html")
+                                                     # )
+                                                      #uiOutput("map2_hoverinfo")
                                                   )
                                               )
                                           )
