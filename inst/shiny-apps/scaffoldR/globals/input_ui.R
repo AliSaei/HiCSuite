@@ -339,7 +339,7 @@ shinyUI(
                                  textInput("titleMap2",label = "Scaffold name:", value = "", width = '100%'),
                                  div(style = "margin-bottom: 20px;",
                                      withBusyIndicatorUI(
-                                       actionButton("combineMaps", "Plot whole scaffold map", width = '100%')
+                                       actionButton("combineMaps", "Submit", icon = icon("play", lib = "glyphicon") ,width = '100%')
                                      ),
                                      tags$style(HTML("#combineMaps{font-size: 12px; font-family: Tahoma; font-weight: 550;}"))
                                  )
