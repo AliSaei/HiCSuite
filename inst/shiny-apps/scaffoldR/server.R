@@ -297,13 +297,13 @@ server <- function(input, output, session) {
                      
                      if(grepl("_fragment_\\d+:", tgt_contig)){
                        frag1_start <- as.numeric(sub(".*_fragment_(\\d+):\\d+", "\\1", tgt_contig, perl = TRUE))
-                       frag1_end <- frag1_start + cut_pos
-                       frag2_start <- frag1_start + cut_pos + rv$binsize
+                       frag1_end <- frag1_start + cut_pos + rv$binsize - 1
+                       frag2_start <- frag1_end + 1
                        frag2_end <- as.numeric(sub(".*_fragment_\\d+:", "", tgt_contig))
                      } else {
-                       frag1_start <- 0
-                       frag1_end <- cut_pos
-                       frag2_start <- cut_pos + rv$binsize
+                       frag1_start <- 1
+                       frag1_end <- cut_pos + rv$binsize
+                       frag2_start <- frag1_end + 1
                        frag2_end <- rv$seq_len[rname == tgt_contig, rlen]
                      }
                      
@@ -645,6 +645,8 @@ server <- function(input, output, session) {
     shiny::validate(need(input$seq, ""))
     input$cut1
     input$cut2
+    
+    updateNumericInput(session, "cutPos", value = 0)
     
     withProgress(message = 'Preparing plot',
                  detail = 'please wait ...', value = 1,{
