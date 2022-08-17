@@ -276,8 +276,8 @@ shinyUI(
                                                     condition = "input.action == 'Cut'",
                                                     numericInput("cutPos", "Break position (bp):", value = 0, 
                                                                  min = 0, max = 50000000, step= 100),
-                                                    textInput("frag1Name", "First fragmnet name:", value = "",  width = '100%'),
-                                                    textInput("frag2Name", "Second fragmnet name:", value = "",  width = '100%'),
+                                                    textInput("frag1Name", "First fragmnet name:", value = "Default",  width = '100%'),
+                                                    textInput("frag2Name", "Second fragmnet name:", value = "Default",  width = '100%'),
                                                     withBusyIndicatorUI(
                                                       actionButton("cut1", "Break Sequence", class = "btn-action", 
                                                                    icon = icon('scissors', lib = "glyphicon"))
