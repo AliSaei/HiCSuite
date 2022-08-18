@@ -898,7 +898,7 @@ server <- function(input, output, session) {
             panel.border = element_rect(colour = "gray", fill = NA),
             panel.background = element_rect(fill = "white", colour = "white"))
     
-    #ggsave(file.path(isolate(rv$projDir), "map2.png"), dpi = 320)
+    ggsave(file.path(isolate(rv$projDir), "map2.png"), dpi = 320)
     
     
   }, height = function() {
