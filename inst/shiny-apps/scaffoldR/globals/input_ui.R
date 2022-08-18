@@ -333,9 +333,9 @@ shinyUI(
                          div(id = "VwJointMap2", style ="height: calc(100% + 160px); display: none;",
                              div(style = "border: 1px solid #E8E8E8; width: 100%; padding: 10px; background-color: #ece9df; border-radius: 3px; font-size: 12px; width: 270px; float: left;",
                                  
-                                 textAreaInput("seqList", label = NULL, value = "", 
+                                 textAreaInput("seqList", label = NULL, value = "", rows = 6, 
                                                placeholder = "Please enter one id per line", 
-                                               width = '100%', height = '100%', resize = "vertical"),
+                                               width = '100%', height = '300px', resize = "vertical"),
                                  textInput("titleMap2",label = "Scaffold name:", value = "", width = '100%'),
                                  div(style = "margin-bottom: 20px;",
                                      withBusyIndicatorUI(

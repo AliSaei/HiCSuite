@@ -56,6 +56,7 @@ shinyUI(
       
       # Also add some custom CSS to make the title background area the same
       # color as the rest of the header.
+      tags$head(tags$style(HTML(''))),
       tags$head(tags$style(HTML("
                            .btn-action{font-size: 12px; font-family: Tahoma; width: 100%; font-weight: 550; background-color: green; color: white;}
                            .btn-update{font-size: 12px; font-family:Tahoma; width: 100%; font-weight: 550; background-color: #ece9df;}
@@ -104,7 +105,8 @@ shinyUI(
                             .dbutt{width: 100%; background: #E8E8E8 !important; font-size: 12px; margin-top: 2px;}
                             #map2_tooltip {position: absolute; pointer-events: none; width: 300px; z-index: 100; padding: 0;}
                             #table.dataTable {font-size: 12px; position:relative; !important;}
-                            #.progress-bar {color: transparent !important}
+                            #.progress-bar {color: transparent !important;}
+                            .form-control{font-size: 12px; background: #eeeeee; font-family: Tahoma;}
 
       "))),
       

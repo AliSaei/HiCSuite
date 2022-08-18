@@ -205,7 +205,7 @@ shinyUI(
                                    withBusyIndicatorUI(
                                      textAreaInput("excluded_seqs", label = "Excluded sequences:", value = "", 
                                                    placeholder = "please enter one id per line", 
-                                                   width = '100%', height = '50px', resize = "vertical")
+                                                   width = '100%', height = '200px', resize = "vertical")
                                    )
                                  )
                                  
