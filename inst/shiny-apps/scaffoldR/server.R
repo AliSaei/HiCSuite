@@ -884,7 +884,7 @@ server <- function(input, output, session) {
     len <- rv$combined_maps[, .(len = max(pos)), by = .(rname)] %>%
       .[order(len), ]
     #rv$combined_maps[rname != mrnm | pos != mpos, ], 
-    ggplot(rv$combined_maps, 
+    ggplot(rv$combined_maps[rname != mrnm | pos != mpos, ], 
            aes(x = pos, y = mpos, fill=log10(n/2))) +
       geom_tile() +
       scale_fill_gradient(low = "white", high = "red") +
