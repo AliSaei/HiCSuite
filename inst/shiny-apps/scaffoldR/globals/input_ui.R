@@ -20,9 +20,10 @@ shinyUI(
                                      conditionalPanel(
                                        condition = "input.mapSrc == 'Local'",
                                        #shiny::fileInput("contactMap", NULL, accept = c("csv", ".txt", ".rds"), width = '100%'),
-                                       shinyFiles::shinyDirButton('directory', label='Set Data Directory', 
-                                                                  title='Please select a folder', 
-                                                                  class = "btn-dir", icon = icon("folder-open")),
+                                       textInput("directory", "Data Directory"),
+                                       #shinyFiles::shinyDirButton('directory', label='Set Data Directory', 
+                                       #                           title='Please select a folder', 
+                                       #                           class = "btn-dir", icon = icon("folder-open")),
                                        #verbatimTextOutput("dirPath"),
                                        div(style = "margin-top: 0px;",
                                            pickerInput("mapFile", NULL, choices = NULL , multiple = FALSE,

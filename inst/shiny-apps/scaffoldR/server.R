@@ -27,14 +27,17 @@ server <- function(input, output, session) {
                        intramap_range = NULL,  btn_val2 = c(0,0), btn_val3 = c(0,0))
   
   ## shiny files set up
-  volumes <- c(Home = fs::path_home(), getVolumes()(), `Test Data Directory` = "../../../")
+  ##volumes <- c(Home = fs::path_home(), getVolumes()(), `Test Data Directory` = "../../../")
   
-  shinyDirChoose(input, 'directory', roots = volumes, session = session,
-                 restrictions = system.file(package = "base"))
+  ##shinyDirChoose(input, 'directory', roots = volumes, session = session,
+  ##               restrictions = system.file(package = "base"))
   
   observe({
-    rv$projDir <- parseDirPath(volumes, input$directory)
+    shiny::validate(need(input$directory != "",""))
     
+   # rv$projDir <- parseDirPath(volumes, input$directory)
+    rv$projDir <- input$directory
+    print(rv$projDir)
     rds_list <- list.files(rv$projDir, pattern = ".rds$|.bin|.txt|.csv", 
                            recursive = TRUE, ignore.case = TRUE)
     txt_list <- list.files(rv$projDir, pattern = ".csv$|.txt$|.tab$", 
