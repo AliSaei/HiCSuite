@@ -1,0 +1,22 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: HiCSuite
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Ali
+    family-names: Saei
+    name-particle: Ali
+    email: saeibox@gmail.com
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.13822034
+repository-code: 'https://github.com/AliSaei/HiCSuite.git'
+keywords:
+  - Hi-C
+  - Genome Scaffolding
+license: CC-BY-NC-4.0
